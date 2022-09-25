@@ -3,6 +3,20 @@
 
 lexer grammar MxLexer;
 
+// 5.Idetifier
+Identifier : [a-zA-Z][a-zA-Z0-9_]*;
+
+fragment
+ALPHABATE : [A-Za-z];
+NUMBER : [0-9];
+NUMBER_NOZERO : [1:9];
+
+// Types
+BoolType : TRUE|FALSE;
+IntType : (('-')?NUMBER_NOZERO NUMBER*)|'0';
+VoidType : VOID;
+StringType : '"'('//"'|'////'|.)*?{0,255}'"';
+
 // 2.Keywords
 VOID : 'void';
 BOOL : 'bool';
@@ -22,9 +36,10 @@ BREAK : 'break';
 CONTINUE : 'continue';
 RETURN : 'return';
 
-// 4.Comments
-LINE_COMMENT : '//' .*? '\r'? '\n' -> skip;
-COMMENT : '/*' .*? '*/' -> skip;
-
 // 3.BlankWords
-WS : (' '|'\t'|'\r'|'\n')+ -> skip;
+WhiteSpace : (' '|'\t')+ -> skip;
+NewLine : ('\r''\t'|'\t') -> skip;
+
+// 4.Comments
+LineComment : '//' .*? '\r'? '\n' -> skip;
+BlockComment : '/*' .*? '*/' -> skip;
