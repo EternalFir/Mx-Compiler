@@ -3,19 +3,24 @@
 
 lexer grammar MxLexer;
 
-// 5.Idetifier
-Identifier : [a-zA-Z][a-zA-Z0-9_]*;
+fragment ALPHABATE : [A-Za-z];
 
-fragment
-ALPHABATE : [A-Za-z];
-NUMBER : [0-9];
-NUMBER_NOZERO : [1:9];
+fragment DIGIT : [0-9];
 
-// Types
-BoolType : TRUE|FALSE;
-IntType : (('-')?NUMBER_NOZERO NUMBER*)|'0';
-VoidType : VOID;
-StringType : '"'('//"'|'////'|.)*?{0,255}'"';
+fragment NONZERODIGIT : [1-9];
+
+fragment OCTALDIGIT : [0-7];
+
+fragment HEXADECIMALDIGIT : [0-9a-fA-F];
+
+fragment BINARYDIGIT : [01];
+
+// TypeLiterals
+BoolTypeLiteral : TRUE|FALSE;
+IntTypeLiteral : (('-')?NONZERODIGIT DIGIT*)|'0';
+UnsignedIntTypeLiteral : (NONZERODIGIT DIGIT*);
+NullTypeLiteral : NULL;
+StringTypeLiteral : '"'('//"'|'////'|.)*?{0,255}'"';
 
 // 2.Keywords
 VOID : 'void';
@@ -35,6 +40,11 @@ WHILE : 'while';
 BREAK : 'break';
 CONTINUE : 'continue';
 RETURN : 'return';
+
+//Keywords : VOID|BOOL|INT|STRING|NEW|CLASS|NULL|TRUE|FALSE|THIS|IF|ELSE|FOR|WHILE|BREAK|CONTINUE|RETURN;
+
+// 5.Idetifier
+Identifier : ([a-zA-Z][a-zA-Z0-9_]*);
 
 // 3.BlankWords
 WhiteSpace : (' '|'\t')+ -> skip;
