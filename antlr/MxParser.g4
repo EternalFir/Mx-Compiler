@@ -12,6 +12,7 @@ program_main: var_def | func_def | class_def;
 var_def : type (Identifier ('=' expression)?) (',' Identifier ('=' expression)?)* ';';
 func_def : return_type? Identifier '(' param_group? ')' code_block;
 class_def : CLASS Identifier '{' (var_def | func_def)* '}' ';';
+lambda_def : '[' if_and='&'? ']' '('? parlist=param_group?')'? '->'  code_block '(' par=expression_group? ')';
 
 sentence : code_block                                                                                  #block_Sent
          | var_def                                                                                     #var_def_Sent
@@ -31,6 +32,7 @@ expression : base_exp                                                         #s
            | expression '(' expression_group? ')'                             #func_Exp
            | expression '.' Identifier                                        #member_Exp
            | creation                                                         #new_Exp
+           | lambda_def                                                       #lambda_Exp
            | expression op=('++' | '--')                                      #backself_Exp
            | <assoc=right> op=('++' | '--') expression                        #frontself_Exp
            | <assoc=right> op=('+' | '-') expression                          #prenumber_Exp
