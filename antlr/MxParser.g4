@@ -1,21 +1,24 @@
 // This is a g4 file created for the Mx* Complier Program
 // Created by Eternal-Fir
 
-grammar MxParser;
+parser grammar MxParser;
 
-import MxLexer;
+options {
+	tokenVocab = MxLexer;
+}
+//import MxLexer;
 
 program: program_main* EOF;
-program_main: var_def | func_def | class_def;
+program_main: varDef | funcDef | classDef;
 
-//Difination
-var_def : type (Identifier ('=' expression)?) (',' Identifier ('=' expression)?)* ';';
-func_def : return_type? Identifier '(' param_group? ')' code_block;
-class_def : CLASS Identifier '{' (var_def | func_def)* '}' ';';
-lambda_def : '[' if_and='&'? ']' '('? parlist=param_group?')'? '->'  code_block '(' par=expression_group? ')';
+//Definition
+varDef : type (Identifier ('=' expression)?) (',' Identifier ('=' expression)?)* ';';
+funcDef : return_type? Identifier '(' param_group? ')' code_block;
+classDef : CLASS Identifier '{' (varDef | funcDef)* '}' ';';
+lambdaDef : '[' if_and='&'? ']' ('(' parlist=param_group?')')? '->'  code_block '(' par=expression_group? ')';
 
 sentence : code_block                                                                                  #block_Sent
-         | var_def                                                                                     #var_def_Sent
+         | varDef                                                                                      #var_def_Sent
          | IF '(' cond=expression ')' true_sent=sentence (ELSE false_sent=sentence)?                   #if_Sent
          | FOR '(' init=expression? ';' cond=expression? ';' move=expression? ')' repe_sent=sentence   #for_Sent
          | WHILE '(' cond=expression ')' repe_sent=sentence                                            #while_Sent
@@ -32,21 +35,22 @@ expression : base_exp                                                         #s
            | expression '(' expression_group? ')'                             #func_Exp
            | expression '.' Identifier                                        #member_Exp
            | creation                                                         #new_Exp
-           | lambda_def                                                       #lambda_Exp
+           | lambdaDef                                                        #lambda_Exp
            | expression op=('++' | '--')                                      #backself_Exp
            | <assoc=right> op=('++' | '--') expression                        #frontself_Exp
            | <assoc=right> op=('+' | '-') expression                          #prenumber_Exp
-           | <assoc=right> op=('!' | '~') expression                          #prebinary_Exp
+           | <assoc=right> op='!' expression                                  #logic_no_Exp
+           | <assoc=right> op='~' expression                                  #bitwise_no_Exp
            | lexp=expression op=('*' | '/' | '%') rexp=expression             #mul_div_mod_Exp
            | lexp=expression op=('+' | '-') rexp=expression                   #add_sub_Exp
-           | lexp=expression op=('<<' | '>>') rexp=expression                 #move_Exp
+           | lexp=expression op=('<<' | '>>') rexp=expression                 #bitwise_move_Exp
            | lexp=expression op=('<' | '>' | '<=' | '>=') rexp=expression     #compare_Exp
-           | lexp=expression op=('==' | '!=') rexp=expression                 #ifsame_Exp
-           | lexp=expression op='&' rexp=expression                           #and_Exp
-           | lexp=expression op='^' rexp=expression                           #xor_Exp
-           | lexp=expression op='|' rexp=expression                           #or_Exp
-           | lexp=expression op='&&' rexp=expression                          #relation_and_Exp
-           | lexp=expression op='||' rexp=expression                          #relation_or_Exp
+           | lexp=expression op=('==' | '!=') rexp=expression                 #is_equare_Exp
+           | lexp=expression op='&&' rexp=expression                          #logic_and_Exp
+           | lexp=expression op='||' rexp=expression                          #logic_or_Exp
+           | lexp=expression op='&' rexp=expression                           #bitwise_and_Exp
+           | lexp=expression op='^' rexp=expression                           #bitwise_xor_Exp
+           | lexp=expression op='|' rexp=expression                           #bitwise_or_Exp
            | <assoc=right> lexp=expression op='=' rexp=expression             #envalue_Exp
            ;
 
@@ -76,5 +80,3 @@ base_exp : literal
         | THIS
         | Identifier
         ;
-
-// TODO: lambda?

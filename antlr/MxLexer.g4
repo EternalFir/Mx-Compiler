@@ -46,6 +46,45 @@ RETURN : 'return';
 // 5.Idetifier
 Identifier : ([a-zA-Z][a-zA-Z0-9_]*);
 
+// Punctuation
+LEFT_PARENTHESIS : '(';
+RIGHT_PARENTHESIS : ')';
+LEFT_SQUAREBRACKETS : '[';
+RIGHT_SQUAREBRACKETS : ']';
+LEFT_BRACKETS : '{';
+RIGHT_BRACKETS : '}';
+COLON : ':';
+SEMICOLON : ';';
+COMMA : ',';
+DOT : '.';
+ARROW : '->';
+SELFADD : '++';
+SELFSUB : '--';
+MUL : '*';
+DIV : '/';
+MOD : '%';
+ADD : '+';
+SUB : '-';
+LOGIC_NO : '!';
+LOGIC_AND : '&&';
+LOGIC_OR : '||';
+BITWISE_NO : '~';
+BITWISE_MOVE_LEFT : '<<';
+BITWISE_MOVE_RIGHT : '>>';
+BITWISE_AND : '&';
+BITWISE_OR : '|';
+BITWISE_XOR : '^';
+GREATER_EQUARE : '>=';
+LESS_EQUARE : '<=';
+GREATER : '>';
+LESS : '<';
+EQUARE : '==';
+UNEQUARE : '!=';
+ENVALUE : '=';
+
+
+
+
 // 3.BlankWords
 WhiteSpace : (' '|'\t')+ -> skip;
 NewLine : ('\r''\t'|'\t') -> skip;
@@ -53,3 +92,5 @@ NewLine : ('\r''\t'|'\t') -> skip;
 // 4.Comments
 LineComment : '//' .*? '\r'? '\n' -> skip;
 BlockComment : '/*' .*? '*/' -> skip;
+
+
