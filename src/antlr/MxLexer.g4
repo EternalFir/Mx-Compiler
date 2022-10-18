@@ -20,7 +20,7 @@ BoolTypeLiteral : TRUE|FALSE;
 IntTypeLiteral : (('-')?NONZERODIGIT DIGIT*)|'0';
 UnsignedIntTypeLiteral : (NONZERODIGIT DIGIT*);
 NullTypeLiteral : NULL;
-StringTypeLiteral : '"'('//"'|'////'|.)*?{0,255}'"';
+StringTypeLiteral : '"' ('\\"' | '\\\\' | '\\n' | ~[\\])*? '"';
 
 // 2.Keywords
 VOID : 'void';

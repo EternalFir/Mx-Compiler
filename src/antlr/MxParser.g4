@@ -13,7 +13,8 @@ programSub: varDef | funcDef | classDef;
 programMain: funcDefMain;
 
 //Definition
-varDef : type (Identifier ('=' expression)?) (',' Identifier ('=' expression)?)* ';';
+varDef : type varDefSub (',' varDefSub)* ';';
+varDefSub : Identifier ('=' expression)?;
 funcDef : returnType? Identifier '(' paramGroup? ')' codeBlock ;
 funcDefMain : INT MAIN '(' ')' codeBlock;
 classDef : CLASS Identifier '{' (varDef | funcDef)* '}' ';';
@@ -82,3 +83,5 @@ baseExp : literal
         | THIS
         | Identifier
         ;
+
+identifier: Identifier | 'main';
