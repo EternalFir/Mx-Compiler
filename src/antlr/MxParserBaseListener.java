@@ -28,6 +28,18 @@ public class MxParserBaseListener implements MxParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterProgramSub(MxParser.ProgramSubContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitProgramSub(MxParser.ProgramSubContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterProgramMain(MxParser.ProgramMainContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -59,6 +71,18 @@ public class MxParserBaseListener implements MxParserListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitFuncDef(MxParser.FuncDefContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterFuncDefMain(MxParser.FuncDefMainContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitFuncDefMain(MxParser.FuncDefMainContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

@@ -8,12 +8,14 @@ options {
 }
 //import MxLexer;
 
-program: programMain* EOF;
-programMain: varDef | funcDef | classDef;
+program: programSub* programMain programSub* EOF;
+programSub: varDef | funcDef | classDef;
+programMain: funcDefMain;
 
 //Definition
 varDef : type (Identifier ('=' expression)?) (',' Identifier ('=' expression)?)* ';';
-funcDef : returnType? Identifier '(' paramGroup? ')' codeBlock;
+funcDef : returnType? Identifier '(' paramGroup? ')' codeBlock ;
+funcDefMain : INT MAIN '(' ')' codeBlock;
 classDef : CLASS Identifier '{' (varDef | funcDef)* '}' ';';
 lambdaDef : '[' ifAnd='&'? ']' ('(' parlist=paramGroup?')')? '->'  codeBlock '(' par=expressionGroup? ')';
 

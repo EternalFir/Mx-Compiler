@@ -51,6 +51,8 @@ public class Scope {
             throw new semanticError("type undefined", pos_in);
     }
 
+    public basicType getType(typeNode node_in)
+
     public void addVariable(String name_in, varSymbol value_in, position pos_in) {
         if (this.containType(name_in, pos_in, true))
             throw new semanticError("type name duplicated", pos_in);

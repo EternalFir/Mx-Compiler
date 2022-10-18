@@ -18,6 +18,16 @@ public interface MxParserListener extends ParseTreeListener {
 	 */
 	void exitProgram(MxParser.ProgramContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link MxParser#programSub}.
+	 * @param ctx the parse tree
+	 */
+	void enterProgramSub(MxParser.ProgramSubContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MxParser#programSub}.
+	 * @param ctx the parse tree
+	 */
+	void exitProgramSub(MxParser.ProgramSubContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link MxParser#programMain}.
 	 * @param ctx the parse tree
 	 */
@@ -47,6 +57,16 @@ public interface MxParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitFuncDef(MxParser.FuncDefContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MxParser#funcDefMain}.
+	 * @param ctx the parse tree
+	 */
+	void enterFuncDefMain(MxParser.FuncDefMainContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MxParser#funcDefMain}.
+	 * @param ctx the parse tree
+	 */
+	void exitFuncDefMain(MxParser.FuncDefMainContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link MxParser#classDef}.
 	 * @param ctx the parse tree
