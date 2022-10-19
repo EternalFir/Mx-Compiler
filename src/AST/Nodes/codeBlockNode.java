@@ -1,4 +1,18 @@
 package AST.Nodes;
 
-public class codeBlockNode {
+import Utility.position;
+
+import java.util.ArrayList;
+
+public class codeBlockNode extends ASTNode{
+    public ArrayList<SentenceNode> sentencesList=new ArrayList<>();
+
+    public codeBlockNode(position pos_in,ArrayList<SentenceNode> sentence_in){
+        super(pos_in);
+        sentencesList=sentence_in;
+    }
+
+    public void accept(ASTVisitor visitor){
+        visitor.visit(this);
+    }
 }

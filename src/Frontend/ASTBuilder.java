@@ -1,35 +1,75 @@
 package Frontend;
 
-import AST.*;
+import AST.Nodes.*;
 import AST.Nodes.ASTNode;
 import antlr.MxParserVisitor;
 import antlr.MxParser;
+import antlr.MxParserBaseVisitor;
 import Utility.position;
+import Utility.errors.syntaxError;
+import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.RuleNode;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
+import java.util.ArrayList;
 
 
 public class ASTBuilder implements MxParserVisitor<ASTNode> {
+
     @Override
     public ASTNode visitProgram(MxParser.ProgramContext ctx) {
-        return null;
+        programNode node = new programNode(new position(ctx));
+        if (ctx.programSub() != null) {
+            for (ParserRuleContext i : ctx.programSub()) {
+                ASTNode t = visit(i);
+                if (t instanceof varDefNode) {
+                    node.proBody.addAll(((varDefNode) t).varDefList);
+                } else {
+                    node.proBody.add(t);
+                }
+            }
+        }
+        return node;
     }
 
     @Override
     public ASTNode visitProgramSub(MxParser.ProgramSubContext ctx) {
-        return null;
+        if (ctx.funcDef() != null)
+            return visit(ctx.funcDef());
+        else if (ctx.varDef() != null)
+            return visit(ctx.varDef());
+        else if (ctx.classDef() != null)
+            return visit(ctx.classDef());
+        else
+            return null;
     }
 
     @Override
     public ASTNode visitProgramMain(MxParser.ProgramMainContext ctx) {
-        return ctx.funcDefMain().accept(this);
+        if(ctx.funcDefMain()!=null)
+            return visit(ctx.funcDefMain());
+        else
+            return null;
     }
 
     @Override
     public ASTNode visitVarDef(MxParser.VarDefContext ctx) {
+        varDefNode node=new varDefNode(new position(ctx));
+        typeNode type=(typeNode) visit(ctx.type());
+        if(!ctx.varDefSub().isEmpty()){
+            for(ParserRuleContext i : ctx.varDefSub()){
+                varDefSubNode t=(varDefSubNode) visit(i);
+                t.type=type;
+                node.varDefList.add(t);
+            }
+        }
+        return node;
+    }
+
+    @Override
+    public ASTNode visitVarDefSub(MxParser.VarDefSubContext ctx) {
         return null;
     }
 
@@ -40,8 +80,7 @@ public class ASTBuilder implements MxParserVisitor<ASTNode> {
 
     @Override
     public ASTNode visitFuncDefMain(MxParser.FuncDefMainContext ctx) {
-         var a=new funcDefMainNode;
-
+        var a = new funcDefMainNode;
     }
 
     @Override
@@ -66,8 +105,8 @@ public class ASTBuilder implements MxParserVisitor<ASTNode> {
 
     @Override
     public ASTNode visitIfSent(MxParser.IfSentContext ctx) {
-        var thisNode=new IfSent;
-        thisNode.cond=ctx.cond.accept(this);
+        var thisNode = new ifSentNode;
+        thisNode.cond = ctx.cond.accept(this);
         return thisNode;
     }
 
@@ -112,12 +151,12 @@ public class ASTBuilder implements MxParserVisitor<ASTNode> {
     }
 
     @Override
-    public ASTNode visitBitwiseXorExp(MxParser.BitwiseXorExpContext ctx) {
+    public ASTNode visitPreNumberExp(MxParser.PreNumberExpContext ctx) {
         return null;
     }
 
     @Override
-    public ASTNode visitLogicNoExp(MxParser.LogicNoExpContext ctx) {
+    public ASTNode visitBinaryExp(MxParser.BinaryExpContext ctx) {
         return null;
     }
 
@@ -127,77 +166,7 @@ public class ASTBuilder implements MxParserVisitor<ASTNode> {
     }
 
     @Override
-    public ASTNode visitBitwiseMoveExp(MxParser.BitwiseMoveExpContext ctx) {
-        return null;
-    }
-
-    @Override
     public ASTNode visitNewExp(MxParser.NewExpContext ctx) {
-        return null;
-    }
-
-    @Override
-    public ASTNode visitEnvalueExp(MxParser.EnvalueExpContext ctx) {
-        return null;
-    }
-
-    @Override
-    public ASTNode visitFrontselfExp(MxParser.FrontselfExpContext ctx) {
-        return null;
-    }
-
-    @Override
-    public ASTNode visitFuncExp(MxParser.FuncExpContext ctx) {
-        return null;
-    }
-
-    @Override
-    public ASTNode visitBitwiseAndExp(MxParser.BitwiseAndExpContext ctx) {
-        return null;
-    }
-
-    @Override
-    public ASTNode visitSimpleExp(MxParser.SimpleExpContext ctx) {
-        return null;
-    }
-
-    @Override
-    public ASTNode visitArrayExp(MxParser.ArrayExpContext ctx) {
-        return null;
-    }
-
-    @Override
-    public ASTNode visitLogicAndExp(MxParser.LogicAndExpContext ctx) {
-        return null;
-    }
-
-    @Override
-    public ASTNode visitAddSubExp(MxParser.AddSubExpContext ctx) {
-        return null;
-    }
-
-    @Override
-    public ASTNode visitBitwiseNoExp(MxParser.BitwiseNoExpContext ctx) {
-        return null;
-    }
-
-    @Override
-    public ASTNode visitPrenumberExp(MxParser.PrenumberExpContext ctx) {
-        return null;
-    }
-
-    @Override
-    public ASTNode visitCompareExp(MxParser.CompareExpContext ctx) {
-        return null;
-    }
-
-    @Override
-    public ASTNode visitLogicOrExp(MxParser.LogicOrExpContext ctx) {
-        return null;
-    }
-
-    @Override
-    public ASTNode visitMulDivModExp(MxParser.MulDivModExpContext ctx) {
         return null;
     }
 
@@ -212,12 +181,27 @@ public class ASTBuilder implements MxParserVisitor<ASTNode> {
     }
 
     @Override
-    public ASTNode visitBitwiseOrExp(MxParser.BitwiseOrExpContext ctx) {
+    public ASTNode visitFrontselfExp(MxParser.FrontselfExpContext ctx) {
         return null;
     }
 
     @Override
-    public ASTNode visitIsEquareExp(MxParser.IsEquareExpContext ctx) {
+    public ASTNode visitFuncExp(MxParser.FuncExpContext ctx) {
+        return null;
+    }
+
+    @Override
+    public ASTNode visitPreLogicNoExp(MxParser.PreLogicNoExpContext ctx) {
+        return null;
+    }
+
+    @Override
+    public ASTNode visitSimpleExp(MxParser.SimpleExpContext ctx) {
+        return null;
+    }
+
+    @Override
+    public ASTNode visitArrayExp(MxParser.ArrayExpContext ctx) {
         return null;
     }
 
@@ -260,8 +244,10 @@ public class ASTBuilder implements MxParserVisitor<ASTNode> {
     public ASTNode visitBaseType(MxParser.BaseTypeContext ctx) {
         var text = ctx.getText();
         switch (text) {
-            case "int": return new IntTypeNode();
-            case "bool": return new BoolTypeNode();
+            case "int":
+                return new IntTypeNode;
+            case "bool":
+                return new BoolTypeNode;
         }
         return null;
     }
@@ -278,6 +264,11 @@ public class ASTBuilder implements MxParserVisitor<ASTNode> {
 
     @Override
     public ASTNode visitBaseExp(MxParser.BaseExpContext ctx) {
+        return null;
+    }
+
+    @Override
+    public ASTNode visitIdentifier(MxParser.IdentifierContext ctx) {
         return null;
     }
 

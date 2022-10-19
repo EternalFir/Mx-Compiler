@@ -4,10 +4,10 @@ import Utility.position;
 
 import java.util.ArrayList;
 
-public class progromNode extends ASTNode{
+public class programNode extends ASTNode{
     public ArrayList<ASTNode> proBody =new ArrayList<>();
 
-    public progromNode(position pos_in){
+    public programNode(position pos_in){
         super(pos_in);
     }
 

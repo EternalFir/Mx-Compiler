@@ -10,11 +10,11 @@ public class funcDefNode extends DefNode {
     public String name;
     public typeNode type;
     public codeBlockNode codeBlock;
-    public ArrayList<varDefNode> paramList;
-
+    public ArrayList<varDefSubNode> paramList;
+    public funcSymbol funcSymbol = null;
     public basicType returnType = null;
 
-    public funcDefNode(position pos_in, String name_in, typeNode type_in, codeBlockNode codeBlock_in, ArrayList<varDefNode> paramList_in) {
+    public funcDefNode(position pos_in, String name_in, typeNode type_in, codeBlockNode codeBlock_in, ArrayList<varDefSubNode> paramList_in) {
         super(pos_in);
         name = name_in;
         type = type_in;
