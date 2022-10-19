@@ -228,29 +228,29 @@ public interface MxParserListener extends ParseTreeListener {
 	 */
 	void exitCodeBlock(MxParser.CodeBlockContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code bitwiseXorExp}
+	 * Enter a parse tree produced by the {@code preNumberExp}
 	 * labeled alternative in {@link MxParser#expression}.
 	 * @param ctx the parse tree
 	 */
-	void enterBitwiseXorExp(MxParser.BitwiseXorExpContext ctx);
+	void enterPreNumberExp(MxParser.PreNumberExpContext ctx);
 	/**
-	 * Exit a parse tree produced by the {@code bitwiseXorExp}
+	 * Exit a parse tree produced by the {@code preNumberExp}
 	 * labeled alternative in {@link MxParser#expression}.
 	 * @param ctx the parse tree
 	 */
-	void exitBitwiseXorExp(MxParser.BitwiseXorExpContext ctx);
+	void exitPreNumberExp(MxParser.PreNumberExpContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code logicNoExp}
+	 * Enter a parse tree produced by the {@code binaryExp}
 	 * labeled alternative in {@link MxParser#expression}.
 	 * @param ctx the parse tree
 	 */
-	void enterLogicNoExp(MxParser.LogicNoExpContext ctx);
+	void enterBinaryExp(MxParser.BinaryExpContext ctx);
 	/**
-	 * Exit a parse tree produced by the {@code logicNoExp}
+	 * Exit a parse tree produced by the {@code binaryExp}
 	 * labeled alternative in {@link MxParser#expression}.
 	 * @param ctx the parse tree
 	 */
-	void exitLogicNoExp(MxParser.LogicNoExpContext ctx);
+	void exitBinaryExp(MxParser.BinaryExpContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code memberExp}
 	 * labeled alternative in {@link MxParser#expression}.
@@ -264,18 +264,6 @@ public interface MxParserListener extends ParseTreeListener {
 	 */
 	void exitMemberExp(MxParser.MemberExpContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code bitwiseMoveExp}
-	 * labeled alternative in {@link MxParser#expression}.
-	 * @param ctx the parse tree
-	 */
-	void enterBitwiseMoveExp(MxParser.BitwiseMoveExpContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code bitwiseMoveExp}
-	 * labeled alternative in {@link MxParser#expression}.
-	 * @param ctx the parse tree
-	 */
-	void exitBitwiseMoveExp(MxParser.BitwiseMoveExpContext ctx);
-	/**
 	 * Enter a parse tree produced by the {@code newExp}
 	 * labeled alternative in {@link MxParser#expression}.
 	 * @param ctx the parse tree
@@ -287,162 +275,6 @@ public interface MxParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitNewExp(MxParser.NewExpContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code envalueExp}
-	 * labeled alternative in {@link MxParser#expression}.
-	 * @param ctx the parse tree
-	 */
-	void enterEnvalueExp(MxParser.EnvalueExpContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code envalueExp}
-	 * labeled alternative in {@link MxParser#expression}.
-	 * @param ctx the parse tree
-	 */
-	void exitEnvalueExp(MxParser.EnvalueExpContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code frontselfExp}
-	 * labeled alternative in {@link MxParser#expression}.
-	 * @param ctx the parse tree
-	 */
-	void enterFrontselfExp(MxParser.FrontselfExpContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code frontselfExp}
-	 * labeled alternative in {@link MxParser#expression}.
-	 * @param ctx the parse tree
-	 */
-	void exitFrontselfExp(MxParser.FrontselfExpContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code funcExp}
-	 * labeled alternative in {@link MxParser#expression}.
-	 * @param ctx the parse tree
-	 */
-	void enterFuncExp(MxParser.FuncExpContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code funcExp}
-	 * labeled alternative in {@link MxParser#expression}.
-	 * @param ctx the parse tree
-	 */
-	void exitFuncExp(MxParser.FuncExpContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code bitwiseAndExp}
-	 * labeled alternative in {@link MxParser#expression}.
-	 * @param ctx the parse tree
-	 */
-	void enterBitwiseAndExp(MxParser.BitwiseAndExpContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code bitwiseAndExp}
-	 * labeled alternative in {@link MxParser#expression}.
-	 * @param ctx the parse tree
-	 */
-	void exitBitwiseAndExp(MxParser.BitwiseAndExpContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code simpleExp}
-	 * labeled alternative in {@link MxParser#expression}.
-	 * @param ctx the parse tree
-	 */
-	void enterSimpleExp(MxParser.SimpleExpContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code simpleExp}
-	 * labeled alternative in {@link MxParser#expression}.
-	 * @param ctx the parse tree
-	 */
-	void exitSimpleExp(MxParser.SimpleExpContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code arrayExp}
-	 * labeled alternative in {@link MxParser#expression}.
-	 * @param ctx the parse tree
-	 */
-	void enterArrayExp(MxParser.ArrayExpContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code arrayExp}
-	 * labeled alternative in {@link MxParser#expression}.
-	 * @param ctx the parse tree
-	 */
-	void exitArrayExp(MxParser.ArrayExpContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code logicAndExp}
-	 * labeled alternative in {@link MxParser#expression}.
-	 * @param ctx the parse tree
-	 */
-	void enterLogicAndExp(MxParser.LogicAndExpContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code logicAndExp}
-	 * labeled alternative in {@link MxParser#expression}.
-	 * @param ctx the parse tree
-	 */
-	void exitLogicAndExp(MxParser.LogicAndExpContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code addSubExp}
-	 * labeled alternative in {@link MxParser#expression}.
-	 * @param ctx the parse tree
-	 */
-	void enterAddSubExp(MxParser.AddSubExpContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code addSubExp}
-	 * labeled alternative in {@link MxParser#expression}.
-	 * @param ctx the parse tree
-	 */
-	void exitAddSubExp(MxParser.AddSubExpContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code bitwiseNoExp}
-	 * labeled alternative in {@link MxParser#expression}.
-	 * @param ctx the parse tree
-	 */
-	void enterBitwiseNoExp(MxParser.BitwiseNoExpContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code bitwiseNoExp}
-	 * labeled alternative in {@link MxParser#expression}.
-	 * @param ctx the parse tree
-	 */
-	void exitBitwiseNoExp(MxParser.BitwiseNoExpContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code prenumberExp}
-	 * labeled alternative in {@link MxParser#expression}.
-	 * @param ctx the parse tree
-	 */
-	void enterPrenumberExp(MxParser.PrenumberExpContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code prenumberExp}
-	 * labeled alternative in {@link MxParser#expression}.
-	 * @param ctx the parse tree
-	 */
-	void exitPrenumberExp(MxParser.PrenumberExpContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code compareExp}
-	 * labeled alternative in {@link MxParser#expression}.
-	 * @param ctx the parse tree
-	 */
-	void enterCompareExp(MxParser.CompareExpContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code compareExp}
-	 * labeled alternative in {@link MxParser#expression}.
-	 * @param ctx the parse tree
-	 */
-	void exitCompareExp(MxParser.CompareExpContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code logicOrExp}
-	 * labeled alternative in {@link MxParser#expression}.
-	 * @param ctx the parse tree
-	 */
-	void enterLogicOrExp(MxParser.LogicOrExpContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code logicOrExp}
-	 * labeled alternative in {@link MxParser#expression}.
-	 * @param ctx the parse tree
-	 */
-	void exitLogicOrExp(MxParser.LogicOrExpContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code mulDivModExp}
-	 * labeled alternative in {@link MxParser#expression}.
-	 * @param ctx the parse tree
-	 */
-	void enterMulDivModExp(MxParser.MulDivModExpContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code mulDivModExp}
-	 * labeled alternative in {@link MxParser#expression}.
-	 * @param ctx the parse tree
-	 */
-	void exitMulDivModExp(MxParser.MulDivModExpContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code backselfExp}
 	 * labeled alternative in {@link MxParser#expression}.
@@ -468,29 +300,65 @@ public interface MxParserListener extends ParseTreeListener {
 	 */
 	void exitLambdaExp(MxParser.LambdaExpContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code bitwiseOrExp}
+	 * Enter a parse tree produced by the {@code frontselfExp}
 	 * labeled alternative in {@link MxParser#expression}.
 	 * @param ctx the parse tree
 	 */
-	void enterBitwiseOrExp(MxParser.BitwiseOrExpContext ctx);
+	void enterFrontselfExp(MxParser.FrontselfExpContext ctx);
 	/**
-	 * Exit a parse tree produced by the {@code bitwiseOrExp}
+	 * Exit a parse tree produced by the {@code frontselfExp}
 	 * labeled alternative in {@link MxParser#expression}.
 	 * @param ctx the parse tree
 	 */
-	void exitBitwiseOrExp(MxParser.BitwiseOrExpContext ctx);
+	void exitFrontselfExp(MxParser.FrontselfExpContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code isEquareExp}
+	 * Enter a parse tree produced by the {@code funcExp}
 	 * labeled alternative in {@link MxParser#expression}.
 	 * @param ctx the parse tree
 	 */
-	void enterIsEquareExp(MxParser.IsEquareExpContext ctx);
+	void enterFuncExp(MxParser.FuncExpContext ctx);
 	/**
-	 * Exit a parse tree produced by the {@code isEquareExp}
+	 * Exit a parse tree produced by the {@code funcExp}
 	 * labeled alternative in {@link MxParser#expression}.
 	 * @param ctx the parse tree
 	 */
-	void exitIsEquareExp(MxParser.IsEquareExpContext ctx);
+	void exitFuncExp(MxParser.FuncExpContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code preLogicNoExp}
+	 * labeled alternative in {@link MxParser#expression}.
+	 * @param ctx the parse tree
+	 */
+	void enterPreLogicNoExp(MxParser.PreLogicNoExpContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code preLogicNoExp}
+	 * labeled alternative in {@link MxParser#expression}.
+	 * @param ctx the parse tree
+	 */
+	void exitPreLogicNoExp(MxParser.PreLogicNoExpContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code simpleExp}
+	 * labeled alternative in {@link MxParser#expression}.
+	 * @param ctx the parse tree
+	 */
+	void enterSimpleExp(MxParser.SimpleExpContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code simpleExp}
+	 * labeled alternative in {@link MxParser#expression}.
+	 * @param ctx the parse tree
+	 */
+	void exitSimpleExp(MxParser.SimpleExpContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code arrayExp}
+	 * labeled alternative in {@link MxParser#expression}.
+	 * @param ctx the parse tree
+	 */
+	void enterArrayExp(MxParser.ArrayExpContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code arrayExp}
+	 * labeled alternative in {@link MxParser#expression}.
+	 * @param ctx the parse tree
+	 */
+	void exitArrayExp(MxParser.ArrayExpContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link MxParser#expressionGroup}.
 	 * @param ctx the parse tree

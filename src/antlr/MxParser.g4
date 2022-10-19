@@ -23,7 +23,7 @@ lambdaDef : '[' ifAnd='&'? ']' ('(' parlist=paramGroup?')')? '->'  codeBlock '('
 sentence : codeBlock                                                                                 #blockSent
          | varDef                                                                                    #varDefSent
          | IF '(' cond=expression ')' trueSent=sentence (ELSE falseSent=sentence)?                   #ifSent
-         | FOR '(' init=expression? ';' cond=expression? ';' move=expression? ')' repeSent=sentence  #forSent
+         | FOR '(' init=expression?  ';' cond=expression? ';' move=expression? ')' repeSent=sentence #forSent
          | WHILE '(' cond=expression ')' repeSent=sentence                                           #whileSent
          | RETURN expression? ';'                                                                    #returnSent
          | BREAK ';'                                                                                 #breakSent
@@ -41,20 +41,19 @@ expression : baseExp                                                          #s
            | lambdaDef                                                        #lambdaExp
            | expression op=('++' | '--')                                      #backselfExp
            | <assoc=right> op=('++' | '--') expression                        #frontselfExp
-           | <assoc=right> op=('+' | '-') expression                          #prenumberExp
-           | <assoc=right> op='!' expression                                  #logicNoExp
-           | <assoc=right> op='~' expression                                  #bitwiseNoExp
-           | lexp=expression op=('*' | '/' | '%') rexp=expression             #mulDivModExp
-           | lexp=expression op=('+' | '-') rexp=expression                   #addSubExp
-           | lexp=expression op=('<<' | '>>') rexp=expression                 #bitwiseMoveExp
-           | lexp=expression op=('<' | '>' | '<=' | '>=') rexp=expression     #compareExp
-           | lexp=expression op=('==' | '!=') rexp=expression                 #isEquareExp
-           | lexp=expression op='&&' rexp=expression                          #logicAndExp
-           | lexp=expression op='||' rexp=expression                          #logicOrExp
-           | lexp=expression op='&' rexp=expression                           #bitwiseAndExp
-           | lexp=expression op='^' rexp=expression                           #bitwiseXorExp
-           | lexp=expression op='|' rexp=expression                           #bitwiseOrExp
-           | <assoc=right> lexp=expression op='=' rexp=expression             #envalueExp
+           | <assoc=right> op=('+' | '-') expression                          #preNumberExp
+           | <assoc=right> op=('!' | '~') expression                          #preLogicNoExp
+           | lexp=expression op=('*' | '/' | '%') rexp=expression             #binaryExp
+           | lexp=expression op=('+' | '-') rexp=expression                   #binaryExp
+           | lexp=expression op=('<<' | '>>') rexp=expression                 #binaryExp
+           | lexp=expression op=('<' | '>' | '<=' | '>=') rexp=expression     #binaryExp
+           | lexp=expression op=('==' | '!=') rexp=expression                 #binaryExp
+           | lexp=expression op='&&' rexp=expression                          #binaryExp
+           | lexp=expression op='||' rexp=expression                          #binaryExp
+           | lexp=expression op='&' rexp=expression                           #binaryExp
+           | lexp=expression op='^' rexp=expression                           #binaryExp
+           | lexp=expression op='|' rexp=expression                           #binaryExp
+           | <assoc=right> lexp=expression op='=' rexp=expression             #binaryExp
            ;
 
 expressionGroup : expression (',' expression)*;

@@ -141,19 +141,19 @@ public interface MxParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitCodeBlock(MxParser.CodeBlockContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code bitwiseXorExp}
+	 * Visit a parse tree produced by the {@code preNumberExp}
 	 * labeled alternative in {@link MxParser#expression}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitBitwiseXorExp(MxParser.BitwiseXorExpContext ctx);
+	T visitPreNumberExp(MxParser.PreNumberExpContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code logicNoExp}
+	 * Visit a parse tree produced by the {@code binaryExp}
 	 * labeled alternative in {@link MxParser#expression}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitLogicNoExp(MxParser.LogicNoExpContext ctx);
+	T visitBinaryExp(MxParser.BinaryExpContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code memberExp}
 	 * labeled alternative in {@link MxParser#expression}.
@@ -162,110 +162,12 @@ public interface MxParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitMemberExp(MxParser.MemberExpContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code bitwiseMoveExp}
-	 * labeled alternative in {@link MxParser#expression}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitBitwiseMoveExp(MxParser.BitwiseMoveExpContext ctx);
-	/**
 	 * Visit a parse tree produced by the {@code newExp}
 	 * labeled alternative in {@link MxParser#expression}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitNewExp(MxParser.NewExpContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code envalueExp}
-	 * labeled alternative in {@link MxParser#expression}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitEnvalueExp(MxParser.EnvalueExpContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code frontselfExp}
-	 * labeled alternative in {@link MxParser#expression}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitFrontselfExp(MxParser.FrontselfExpContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code funcExp}
-	 * labeled alternative in {@link MxParser#expression}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitFuncExp(MxParser.FuncExpContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code bitwiseAndExp}
-	 * labeled alternative in {@link MxParser#expression}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitBitwiseAndExp(MxParser.BitwiseAndExpContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code simpleExp}
-	 * labeled alternative in {@link MxParser#expression}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitSimpleExp(MxParser.SimpleExpContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code arrayExp}
-	 * labeled alternative in {@link MxParser#expression}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitArrayExp(MxParser.ArrayExpContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code logicAndExp}
-	 * labeled alternative in {@link MxParser#expression}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitLogicAndExp(MxParser.LogicAndExpContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code addSubExp}
-	 * labeled alternative in {@link MxParser#expression}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitAddSubExp(MxParser.AddSubExpContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code bitwiseNoExp}
-	 * labeled alternative in {@link MxParser#expression}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitBitwiseNoExp(MxParser.BitwiseNoExpContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code prenumberExp}
-	 * labeled alternative in {@link MxParser#expression}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitPrenumberExp(MxParser.PrenumberExpContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code compareExp}
-	 * labeled alternative in {@link MxParser#expression}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitCompareExp(MxParser.CompareExpContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code logicOrExp}
-	 * labeled alternative in {@link MxParser#expression}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitLogicOrExp(MxParser.LogicOrExpContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code mulDivModExp}
-	 * labeled alternative in {@link MxParser#expression}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitMulDivModExp(MxParser.MulDivModExpContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code backselfExp}
 	 * labeled alternative in {@link MxParser#expression}.
@@ -281,19 +183,40 @@ public interface MxParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitLambdaExp(MxParser.LambdaExpContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code bitwiseOrExp}
+	 * Visit a parse tree produced by the {@code frontselfExp}
 	 * labeled alternative in {@link MxParser#expression}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitBitwiseOrExp(MxParser.BitwiseOrExpContext ctx);
+	T visitFrontselfExp(MxParser.FrontselfExpContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code isEquareExp}
+	 * Visit a parse tree produced by the {@code funcExp}
 	 * labeled alternative in {@link MxParser#expression}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitIsEquareExp(MxParser.IsEquareExpContext ctx);
+	T visitFuncExp(MxParser.FuncExpContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code preLogicNoExp}
+	 * labeled alternative in {@link MxParser#expression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitPreLogicNoExp(MxParser.PreLogicNoExpContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code simpleExp}
+	 * labeled alternative in {@link MxParser#expression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitSimpleExp(MxParser.SimpleExpContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code arrayExp}
+	 * labeled alternative in {@link MxParser#expression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitArrayExp(MxParser.ArrayExpContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link MxParser#expressionGroup}.
 	 * @param ctx the parse tree
