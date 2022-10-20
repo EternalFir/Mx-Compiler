@@ -7,9 +7,8 @@ import java.util.ArrayList;
 public class codeBlockNode extends ASTNode{
     public ArrayList<SentenceNode> sentencesList=new ArrayList<>();
 
-    public codeBlockNode(position pos_in,ArrayList<SentenceNode> sentence_in){
+    public codeBlockNode(position pos_in){
         super(pos_in);
-        sentencesList=sentence_in;
     }
 
     public void accept(ASTVisitor visitor){

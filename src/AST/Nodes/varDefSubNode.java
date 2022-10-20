@@ -7,13 +7,17 @@ import Utility.position;
 public class varDefSubNode extends SentenceNode {
     public String name;
     public typeNode type;
-    public ExpressionNode expression;
+    public ExpressionNode expression=null;
     public varSymbol varSymbol;
 
     public varDefSubNode(position pos_in,String name_in,ExpressionNode expression_in){
         super(pos_in);
         name=name_in;
         expression=expression_in;
+    }
+
+    public varDefSubNode(position pos_in){
+        super(pos_in);
     }
 
     public void accept(ASTVisitor visitor){

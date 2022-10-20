@@ -14,6 +14,7 @@ import org.antlr.v4.runtime.tree.RuleNode;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 
 public class ASTBuilder implements MxParserVisitor<ASTNode> {
@@ -48,7 +49,7 @@ public class ASTBuilder implements MxParserVisitor<ASTNode> {
 
     @Override
     public ASTNode visitProgramMain(MxParser.ProgramMainContext ctx) {
-        if(ctx.funcDefMain()!=null)
+        if (ctx.funcDefMain() != null)
             return visit(ctx.funcDefMain());
         else
             return null;
@@ -56,12 +57,12 @@ public class ASTBuilder implements MxParserVisitor<ASTNode> {
 
     @Override
     public ASTNode visitVarDef(MxParser.VarDefContext ctx) {
-        varDefNode node=new varDefNode(new position(ctx));
-        typeNode type=(typeNode) visit(ctx.type());
-        if(!ctx.varDefSub().isEmpty()){
-            for(ParserRuleContext i : ctx.varDefSub()){
-                varDefSubNode t=(varDefSubNode) visit(i);
-                t.type=type;
+        varDefNode node = new varDefNode(new position(ctx));
+        typeNode type = (typeNode) visit(ctx.type());
+        if (!ctx.varDefSub().isEmpty()) {
+            for (ParserRuleContext i : ctx.varDefSub()) {
+                varDefSubNode t = (varDefSubNode) visit(i);
+                t.type = type;
                 node.varDefList.add(t);
             }
         }
@@ -70,84 +71,149 @@ public class ASTBuilder implements MxParserVisitor<ASTNode> {
 
     @Override
     public ASTNode visitVarDefSub(MxParser.VarDefSubContext ctx) {
-        return null;
+        varDefSubNode node = new varDefSubNode(new position(ctx));
+        node.name = ctx.getText();
+        if (ctx.expression() != null) {
+            node.expression = (ExpressionNode) visit(ctx.expression());
+        }
+        ;
+        return node;
     }
 
     @Override
     public ASTNode visitFuncDef(MxParser.FuncDefContext ctx) {
-        return null;
+        funcDefNode node = new funcDefNode(new position(ctx), ctx.Identifier().getText(), ctx.returnType() != null ? (typeNode) visit(ctx.returnType()) : null,
+                (codeBlockNode) visit(ctx.codeBlock()), ctx.paramGroup() != null ? ((varDefNode) visit(ctx.paramGroup())).varDefList : new ArrayList<>());
+        return node;
     }
 
     @Override
     public ASTNode visitFuncDefMain(MxParser.FuncDefMainContext ctx) {
-        var a = new funcDefMainNode;
+        funcDefMainNode node = new funcDefMainNode(new position(ctx), "main", ctx.codeBlock() != null ? (codeBlockNode) visit(ctx.codeBlock()) : null);
+        return node;
     }
 
     @Override
     public ASTNode visitClassDef(MxParser.ClassDefContext ctx) {
-        return null;
+        classDefNode node = new classDefNode(new position(ctx), ctx.Identifier().getText());
+        if (ctx.varDef() != null) {
+            for (ParserRuleContext i : ctx.varDef()) {
+                varDefNode t = (varDefNode) visit(i);
+                node.varList.addAll(t.varDefList);
+            }
+        }
+        if (ctx.funcDef() != null) {
+            for (ParserRuleContext i : ctx.funcDef()) {
+                funcDefNode t = (funcDefNode) visit(i);
+                if (t.type == null)
+                    node.constructor = t;
+                else
+                    node.funcList.add(t);
+            }
+        }
+        return node;
     }
 
     @Override
     public ASTNode visitLambdaDef(MxParser.LambdaDefContext ctx) {
-        return null;
+        lambdaDefNode node = new lambdaDefNode(new position(ctx), Objects.equals(ctx.ifAnd.getText(), "&"),
+                ctx.codeBlock() != null ? (codeBlockNode) visit(ctx.codeBlock()) : null, ctx.paramGroup() != null ? ((varDefNode) visit(ctx.paramGroup())).varDefList : new ArrayList<>(),
+                ctx.expressionGroup() != null ? (expressionGroupNode) visit(ctx.expressionGroup()) : new expressionGroupNode(new position(ctx)));
+        return node;
     }
 
     @Override
     public ASTNode visitBlockSent(MxParser.BlockSentContext ctx) {
-        return null;
+        return visit(ctx.codeBlock());
     }
 
     @Override
     public ASTNode visitVarDefSent(MxParser.VarDefSentContext ctx) {
-        return null;
+        return visit(ctx.varDef());
     }
 
     @Override
     public ASTNode visitIfSent(MxParser.IfSentContext ctx) {
-        var thisNode = new ifSentNode;
-        thisNode.cond = ctx.cond.accept(this);
-        return thisNode;
+        ifSentNode node = new ifSentNode(new position(ctx));
+        node.cond = (ExpressionNode) visit(ctx.cond);
+        node.trueSent = (SentenceNode) visit(ctx.trueSent);
+        if (ctx.falseSent != null)
+            node.falseSent = (SentenceNode) visit(ctx.falseSent);
+        else
+            node.falseSent = null;
+        return node;
     }
 
     @Override
     public ASTNode visitForSent(MxParser.ForSentContext ctx) {
-        return null;
+        forSentNode node = new forSentNode(new position(ctx));
+        if (ctx.init != null)
+            node.init = (ExpressionNode) visit(ctx.init);
+        else
+            node.init = null;
+        if (ctx.cond != null)
+            node.cond = (ExpressionNode) visit(ctx.cond);
+        else
+            node.cond = null;
+        if (ctx.move != null)
+            node.move = (ExpressionNode) visit(ctx.move);
+        else
+            node.move = null;
+        node.repeSent = (SentenceNode) visit(ctx.repeSent);
+        return node;
     }
 
     @Override
     public ASTNode visitWhileSent(MxParser.WhileSentContext ctx) {
-        return null;
+        whileSentNode node = new whileSentNode(new position(ctx));
+        if (ctx.cond != null)
+            node.cond = (ExpressionNode) visit(ctx.cond);
+        else
+            node.cond = null;
+        node.repeSent = (SentenceNode) visit(ctx.repeSent);
+        return node;
     }
 
     @Override
     public ASTNode visitReturnSent(MxParser.ReturnSentContext ctx) {
-        return null;
+        returnSentNode node = new returnSentNode(new position(ctx));
+        if (ctx.expression() != null)
+            node.value = (ExpressionNode) visit(ctx.expression());
+        else
+            node.value = null;
+        return node;
     }
 
     @Override
     public ASTNode visitBreakSent(MxParser.BreakSentContext ctx) {
-        return null;
+        return new breakSentNode(new position(ctx));
     }
 
     @Override
     public ASTNode visitContinueSent(MxParser.ContinueSentContext ctx) {
-        return null;
+        return new continueSentNode(new position(ctx));
     }
 
     @Override
     public ASTNode visitExprOnlySent(MxParser.ExprOnlySentContext ctx) {
-        return null;
+        return new expressionOnlySentNode(new position(ctx), (ExpressionNode) visit(ctx.expression()));
     }
 
     @Override
     public ASTNode visitEmptySent(MxParser.EmptySentContext ctx) {
-        return null;
+        return new emptySentNode(new position(ctx));
     }
 
     @Override
     public ASTNode visitCodeBlock(MxParser.CodeBlockContext ctx) {
-        return null;
+        codeBlockNode node = new codeBlockNode(new position(ctx));
+        if (ctx.sentence() != null) {
+            for (ParserRuleContext i : ctx.sentence()) {
+                SentenceNode t = (SentenceNode) visit(i);
+                node.sentencesList.add(t);
+            }
+        }
+        return node;
     }
 
     @Override

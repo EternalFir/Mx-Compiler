@@ -5,12 +5,12 @@ import Utility.position;
 public class ifSentNode extends SentenceNode {
     public ExpressionNode cond;
 
-    public SentenceNode trunSent, falseSent;
+    public SentenceNode trueSent, falseSent;
 
     public ifSentNode(position pos_in, ExpressionNode condition, SentenceNode trueChoice, SentenceNode falseChoice) {
         super(pos_in);
         cond = condition;
-        trunSent = trueChoice;
+        trueSent = trueChoice;
         falseSent = falseChoice;
     }
 

@@ -32,6 +32,10 @@ public interface ASTVisitor {
 
     void visit(continueSentNode node);
 
+    void visit(expressionOnlySentNode node);
+
+    void visit(emptySentNode node);
+
     void visit(preNumberExpNode node);
 
     void visit(binaryExpNode node);
