@@ -218,124 +218,170 @@ public class ASTBuilder implements MxParserVisitor<ASTNode> {
 
     @Override
     public ASTNode visitPreNumberExp(MxParser.PreNumberExpContext ctx) {
-        return null;
+        return new preNumberExpNode(new position(ctx), ctx.op.getText(), (ExpressionNode) visit(ctx.expression()));
     }
 
     @Override
     public ASTNode visitBinaryExp(MxParser.BinaryExpContext ctx) {
-        return null;
+        return new binaryExpNode(new position(ctx), ctx.op.getText(), (ExpressionNode) visit(ctx.lexp), (ExpressionNode) visit(ctx.rexp));
     }
 
     @Override
     public ASTNode visitMemberExp(MxParser.MemberExpContext ctx) {
-        return null;
+        return new memberExpNode(new position(ctx), (ExpressionNode) visit(ctx.expression()), ctx.Identifier().getText());
     }
 
     @Override
     public ASTNode visitNewExp(MxParser.NewExpContext ctx) {
-        return null;
+        return visit(ctx.creation());
     }
 
     @Override
     public ASTNode visitBackselfExp(MxParser.BackselfExpContext ctx) {
-        return null;
+        return new backselfExpNode(new position(ctx), (ExpressionNode) visit(ctx.expression()), ctx.op.getText());
     }
 
     @Override
     public ASTNode visitLambdaExp(MxParser.LambdaExpContext ctx) {
-        return null;
+        return visit(ctx.lambdaDef());
     }
 
     @Override
     public ASTNode visitFrontselfExp(MxParser.FrontselfExpContext ctx) {
-        return null;
+        return new frontselfExpNode(new position(ctx), (ExpressionNode) visit(ctx.expression()), ctx.op.getText());
     }
 
     @Override
     public ASTNode visitFuncExp(MxParser.FuncExpContext ctx) {
-        return null;
+        funcExpNode node = new funcExpNode(new position(ctx));
+        node.master = (ExpressionNode) visit(ctx.expression());
+        if (ctx.expressionGroup() != null)
+            node.expList = ((expressionGroupNode) visit(ctx.expressionGroup())).expList;
+        else
+            node.expList = new expressionGroupNode(new position(ctx)).expList;
+        return node;
     }
 
     @Override
     public ASTNode visitPreLogicNoExp(MxParser.PreLogicNoExpContext ctx) {
-        return null;
+        return new preLogicExpNode(new position(ctx), (ExpressionNode) visit(ctx.expression()), ctx.op.getText());
     }
 
     @Override
     public ASTNode visitSimpleExp(MxParser.SimpleExpContext ctx) {
-        return null;
+        return visit(ctx.baseExp());
     }
 
     @Override
     public ASTNode visitArrayExp(MxParser.ArrayExpContext ctx) {
-        return null;
+        return new arrayExpNode(new position(ctx), (ExpressionNode) visit(ctx.master), (ExpressionNode) visit(ctx.index));
     }
 
     @Override
     public ASTNode visitExpressionGroup(MxParser.ExpressionGroupContext ctx) {
-        return null;
+        expressionGroupNode node = new expressionGroupNode(new position(ctx));
+        if (ctx.expression() != null) {
+            for (ParserRuleContext i : ctx.expression()) {
+                node.expList.add((ExpressionNode) visit(i));
+            }
+        }
+        return node;
     }
 
     @Override
     public ASTNode visitArrayCreation(MxParser.ArrayCreationContext ctx) {
-        return null;
+        ArrayList<ExpressionNode> expList = new ArrayList<>();
+        for (ParserRuleContext i : ctx.expression()) {
+            expList.add((ExpressionNode) visit(i));
+        }
+        return new newExpNode(new position(ctx), (typeNode) visit(ctx.baseType()), (ctx.getChildCount() - ctx.expression().size() - 1) / 2, expList);
     }
 
     @Override
     public ASTNode visitClassCreation(MxParser.ClassCreationContext ctx) {
-        return null;
+        return new newExpNode(new position(ctx), (typeNode) visit(ctx.baseType()), 0, null);
     }
 
     @Override
     public ASTNode visitSimpleCreation(MxParser.SimpleCreationContext ctx) {
-        return null;
+        return new newExpNode(new position(ctx), (typeNode) visit(ctx.baseType()), 0, null);
     }
 
     @Override
     public ASTNode visitParamGroup(MxParser.ParamGroupContext ctx) {
-        return null;
+        varDefNode node = new varDefNode(new position(ctx));
+        if (ctx.param() != null) {
+            for (ParserRuleContext i : ctx.param()) {
+                node.varDefList.add((varDefSubNode) visit(i));
+            }
+        }
+        return node;
     }
 
     @Override
     public ASTNode visitParam(MxParser.ParamContext ctx) {
-        return null;
+        varDefSubNode node = new varDefSubNode(new position(ctx), ctx.Identifier().getText(), null);
+        node.type = (typeNode) visit(ctx.type());
+        return node;
     }
 
     @Override
     public ASTNode visitType(MxParser.TypeContext ctx) {
-        return null;
+        return new typeNode(new position(ctx), ctx.baseType().getText(), (ctx.getChildCount() - 1) / 2);
     }
 
     @Override
     public ASTNode visitBaseType(MxParser.BaseTypeContext ctx) {
-        var text = ctx.getText();
-        switch (text) {
-            case "int":
-                return new IntTypeNode;
-            case "bool":
-                return new BoolTypeNode;
-        }
-        return null;
+//        var text = ctx.getText();
+//        switch (text) {
+//            case "int":
+//                return new IntTypeNode;
+//            case "bool":
+//                return new BoolTypeNode;
+//        }
+        return new typeNode(new position(ctx), ctx.getText(), 0);
     }
 
     @Override
     public ASTNode visitReturnType(MxParser.ReturnTypeContext ctx) {
-        return null;
+        if (ctx.type() != null) {
+            return visit(ctx.type());
+        } else { //省略类型(void)
+            return new typeNode(new position(ctx), ctx.VOID().getText(), 0);
+        }
     }
 
     @Override
     public ASTNode visitLiteral(MxParser.LiteralContext ctx) {
-        return null;
+        if (ctx.BoolTypeLiteral() != null)
+            return new boolLiteralNode(new position(ctx), Boolean.parseBoolean(ctx.BoolTypeLiteral().getText()));
+        else if (ctx.IntTypeLiteral() != null)
+            return new intLiteralNode(new position(ctx), Integer.parseInt(ctx.IntTypeLiteral().getText()));
+        else if (ctx.NullTypeLiteral() != null)
+            return new nullLiteralNode(new position(ctx));
+        else if (ctx.StringTypeLiteral() != null)
+            return new stringLiteralNode(new position(ctx), ctx.StringTypeLiteral().getText());
+        else
+            throw new syntaxError("literal type error", new position(ctx));
     }
 
     @Override
     public ASTNode visitBaseExp(MxParser.BaseExpContext ctx) {
-        return null;
+        if (ctx.expression() != null)
+            return visit(ctx.expression());
+        else if (ctx.THIS() != null)
+            return new thisExpNode(new position(ctx));
+        else if (ctx.Identifier() != null)
+            return new varExpNode(new position(ctx), ctx.Identifier().getText());
+        else
+            return visit(ctx.literal());
     }
 
     @Override
     public ASTNode visitIdentifier(MxParser.IdentifierContext ctx) {
-        return null;
+        if (Objects.equals(ctx.Identifier().getText(), "main"))
+            return new mainNode(new position(ctx));
+        else return new varExpNode(new position(ctx), ctx.Identifier().getText());
     }
 
     @Override

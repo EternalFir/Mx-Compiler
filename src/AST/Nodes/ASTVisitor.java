@@ -55,4 +55,18 @@ public interface ASTVisitor {
     void visit(arrayExpNode node);
 
     void visit(expressionGroupNode node);
+
+    void visit(boolLiteralNode node);
+
+    void visit(intLiteralNode node);
+
+    void visit(stringLiteralNode node);
+
+    void visit(nullLiteralNode node);
+
+    void visit(thisExpNode node);
+
+    void visit(varExpNode node);
+
+    void visit(mainNode node);
 }

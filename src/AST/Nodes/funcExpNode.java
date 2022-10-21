@@ -14,6 +14,10 @@ public class funcExpNode extends ExpressionNode{
         expList=expList_in.expList;
     }
 
+    public funcExpNode(position pos_in){
+        super(pos_in);
+    }
+
     public void accept(ASTVisitor visitor){
         visitor.visit(this);
     }

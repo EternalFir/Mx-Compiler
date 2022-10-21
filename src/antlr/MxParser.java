@@ -1542,14 +1542,16 @@ public class MxParser extends Parser {
 		}
 	}
 	public static class ArrayExpContext extends ExpressionContext {
+		public ExpressionContext master;
+		public ExpressionContext index;
+		public TerminalNode LEFT_SQUAREBRACKETS() { return getToken(MxParser.LEFT_SQUAREBRACKETS, 0); }
+		public TerminalNode RIGHT_SQUAREBRACKETS() { return getToken(MxParser.RIGHT_SQUAREBRACKETS, 0); }
 		public List<ExpressionContext> expression() {
 			return getRuleContexts(ExpressionContext.class);
 		}
 		public ExpressionContext expression(int i) {
 			return getRuleContext(ExpressionContext.class,i);
 		}
-		public TerminalNode LEFT_SQUAREBRACKETS() { return getToken(MxParser.LEFT_SQUAREBRACKETS, 0); }
-		public TerminalNode RIGHT_SQUAREBRACKETS() { return getToken(MxParser.RIGHT_SQUAREBRACKETS, 0); }
 		public ArrayExpContext(ExpressionContext ctx) { copyFrom(ctx); }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
@@ -1888,13 +1890,14 @@ public class MxParser extends Parser {
 					case 12:
 						{
 						_localctx = new ArrayExpContext(new ExpressionContext(_parentctx, _parentState));
+						((ArrayExpContext)_localctx).master = _prevctx;
 						pushNewRecursionContext(_localctx, _startState, RULE_expression);
 						setState(233);
 						if (!(precpred(_ctx, 20))) throw new FailedPredicateException(this, "precpred(_ctx, 20)");
 						setState(234);
 						match(LEFT_SQUAREBRACKETS);
 						setState(235);
-						expression(0);
+						((ArrayExpContext)_localctx).index = expression(0);
 						setState(236);
 						match(RIGHT_SQUAREBRACKETS);
 						}
@@ -2464,8 +2467,8 @@ public class MxParser extends Parser {
 	}
 
 	public static class ReturnTypeContext extends ParserRuleContext {
-		public BaseTypeContext baseType() {
-			return getRuleContext(BaseTypeContext.class,0);
+		public TypeContext type() {
+			return getRuleContext(TypeContext.class,0);
 		}
 		public TerminalNode VOID() { return getToken(MxParser.VOID, 0); }
 		public ReturnTypeContext(ParserRuleContext parent, int invokingState) {
@@ -2501,7 +2504,7 @@ public class MxParser extends Parser {
 				enterOuterAlt(_localctx, 1);
 				{
 				setState(309);
-				baseType();
+				type();
 				}
 				break;
 			case VOID:
@@ -2581,9 +2584,6 @@ public class MxParser extends Parser {
 	}
 
 	public static class BaseExpContext extends ParserRuleContext {
-		public LiteralContext literal() {
-			return getRuleContext(LiteralContext.class,0);
-		}
 		public TerminalNode LEFT_PARENTHESIS() { return getToken(MxParser.LEFT_PARENTHESIS, 0); }
 		public ExpressionContext expression() {
 			return getRuleContext(ExpressionContext.class,0);
@@ -2591,6 +2591,9 @@ public class MxParser extends Parser {
 		public TerminalNode RIGHT_PARENTHESIS() { return getToken(MxParser.RIGHT_PARENTHESIS, 0); }
 		public TerminalNode THIS() { return getToken(MxParser.THIS, 0); }
 		public TerminalNode Identifier() { return getToken(MxParser.Identifier, 0); }
+		public LiteralContext literal() {
+			return getRuleContext(LiteralContext.class,0);
+		}
 		public BaseExpContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -2617,39 +2620,39 @@ public class MxParser extends Parser {
 			setState(322);
 			_errHandler.sync(this);
 			switch (_input.LA(1)) {
-			case BoolTypeLiteral:
-			case IntTypeLiteral:
-			case NullTypeLiteral:
-			case StringTypeLiteral:
+			case LEFT_PARENTHESIS:
 				enterOuterAlt(_localctx, 1);
 				{
 				setState(315);
-				literal();
-				}
-				break;
-			case LEFT_PARENTHESIS:
-				enterOuterAlt(_localctx, 2);
-				{
-				setState(316);
 				match(LEFT_PARENTHESIS);
-				setState(317);
+				setState(316);
 				expression(0);
-				setState(318);
+				setState(317);
 				match(RIGHT_PARENTHESIS);
 				}
 				break;
 			case THIS:
-				enterOuterAlt(_localctx, 3);
+				enterOuterAlt(_localctx, 2);
 				{
-				setState(320);
+				setState(319);
 				match(THIS);
 				}
 				break;
 			case Identifier:
+				enterOuterAlt(_localctx, 3);
+				{
+				setState(320);
+				match(Identifier);
+				}
+				break;
+			case BoolTypeLiteral:
+			case IntTypeLiteral:
+			case NullTypeLiteral:
+			case StringTypeLiteral:
 				enterOuterAlt(_localctx, 4);
 				{
 				setState(321);
-				match(Identifier);
+				literal();
 				}
 				break;
 			default:
@@ -2968,14 +2971,14 @@ public class MxParser extends Parser {
 		"\u012e\u0001\u0000\u0000\u0000\u0130\u0131\u0001\u0000\u0000\u0000\u0131"+
 		"!\u0001\u0000\u0000\u0000\u0132\u0130\u0001\u0000\u0000\u0000\u0133\u0134"+
 		"\u0007\u0007\u0000\u0000\u0134#\u0001\u0000\u0000\u0000\u0135\u0138\u0003"+
-		"\"\u0011\u0000\u0136\u0138\u0005\u0006\u0000\u0000\u0137\u0135\u0001\u0000"+
+		" \u0010\u0000\u0136\u0138\u0005\u0006\u0000\u0000\u0137\u0135\u0001\u0000"+
 		"\u0000\u0000\u0137\u0136\u0001\u0000\u0000\u0000\u0138%\u0001\u0000\u0000"+
 		"\u0000\u0139\u013a\u0007\b\u0000\u0000\u013a\'\u0001\u0000\u0000\u0000"+
-		"\u013b\u0143\u0003&\u0013\u0000\u013c\u013d\u0005\u0019\u0000\u0000\u013d"+
-		"\u013e\u0003\u0016\u000b\u0000\u013e\u013f\u0005\u001a\u0000\u0000\u013f"+
-		"\u0143\u0001\u0000\u0000\u0000\u0140\u0143\u0005\u000f\u0000\u0000\u0141"+
-		"\u0143\u0005\u0018\u0000\u0000\u0142\u013b\u0001\u0000\u0000\u0000\u0142"+
-		"\u013c\u0001\u0000\u0000\u0000\u0142\u0140\u0001\u0000\u0000\u0000\u0142"+
+		"\u013b\u013c\u0005\u0019\u0000\u0000\u013c\u013d\u0003\u0016\u000b\u0000"+
+		"\u013d\u013e\u0005\u001a\u0000\u0000\u013e\u0143\u0001\u0000\u0000\u0000"+
+		"\u013f\u0143\u0005\u000f\u0000\u0000\u0140\u0143\u0005\u0018\u0000\u0000"+
+		"\u0141\u0143\u0003&\u0013\u0000\u0142\u013b\u0001\u0000\u0000\u0000\u0142"+
+		"\u013f\u0001\u0000\u0000\u0000\u0142\u0140\u0001\u0000\u0000\u0000\u0142"+
 		"\u0141\u0001\u0000\u0000\u0000\u0143)\u0001\u0000\u0000\u0000\u0144\u0145"+
 		"\u0007\t\u0000\u0000\u0145+\u0001\u0000\u0000\u0000 /6>HPSXhjrwz\u0080"+
 		"\u008d\u0092\u0096\u009a\u00a6\u00b1\u00b7\u00c6\u00f1\u00f9\u00fb\u0103"+

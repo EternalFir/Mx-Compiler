@@ -34,7 +34,7 @@ sentence : codeBlock                                                            
 codeBlock : '{' sentence* '}';
 
 expression : baseExp                                                          #simpleExp
-           | expression '[' expression ']'                                    #arrayExp
+           | master=expression '[' index=expression ']'                       #arrayExp
            | expression '(' expressionGroup? ')'                              #funcExp
            | expression '.' Identifier                                        #memberExp
            | creation                                                         #newExp
@@ -69,7 +69,7 @@ param : type Identifier;
 
 type : baseType('['']')*;
 baseType : INT | BOOL | STRING | Identifier;
-returnType : baseType | VOID;
+returnType : type | VOID;
 
 literal : BoolTypeLiteral
         | IntTypeLiteral
@@ -77,10 +77,10 @@ literal : BoolTypeLiteral
         | StringTypeLiteral
         ;
 
-baseExp : literal
-        | '(' expression ')'
+baseExp : '(' expression ')'
         | THIS
         | Identifier
+        | literal
         ;
 
 identifier: Identifier | 'main';

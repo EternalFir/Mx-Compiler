@@ -3,11 +3,11 @@ package AST.Nodes;
 import Utility.position;
 
 public class arrayExpNode extends ExpressionNode {
-    public ExpressionNode base,index;
+    public ExpressionNode master,index;
 
-    public arrayExpNode(position pos_in,ExpressionNode base_in,ExpressionNode index_in){
+    public arrayExpNode(position pos_in,ExpressionNode master_in,ExpressionNode index_in){
         super(pos_in);
-        base=base_in;
+        master=master_in;
         index=index_in;
     }
 
