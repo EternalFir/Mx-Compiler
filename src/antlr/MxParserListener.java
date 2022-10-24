@@ -28,16 +28,6 @@ public interface MxParserListener extends ParseTreeListener {
 	 */
 	void exitProgramSub(MxParser.ProgramSubContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link MxParser#programMain}.
-	 * @param ctx the parse tree
-	 */
-	void enterProgramMain(MxParser.ProgramMainContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link MxParser#programMain}.
-	 * @param ctx the parse tree
-	 */
-	void exitProgramMain(MxParser.ProgramMainContext ctx);
-	/**
 	 * Enter a parse tree produced by {@link MxParser#varDef}.
 	 * @param ctx the parse tree
 	 */
@@ -67,16 +57,6 @@ public interface MxParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitFuncDef(MxParser.FuncDefContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link MxParser#funcDefMain}.
-	 * @param ctx the parse tree
-	 */
-	void enterFuncDefMain(MxParser.FuncDefMainContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link MxParser#funcDefMain}.
-	 * @param ctx the parse tree
-	 */
-	void exitFuncDefMain(MxParser.FuncDefMainContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link MxParser#classDef}.
 	 * @param ctx the parse tree
@@ -475,14 +455,4 @@ public interface MxParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitBaseExp(MxParser.BaseExpContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link MxParser#identifier}.
-	 * @param ctx the parse tree
-	 */
-	void enterIdentifier(MxParser.IdentifierContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link MxParser#identifier}.
-	 * @param ctx the parse tree
-	 */
-	void exitIdentifier(MxParser.IdentifierContext ctx);
 }

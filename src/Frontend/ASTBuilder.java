@@ -4,7 +4,6 @@ import AST.Nodes.*;
 import AST.Nodes.ASTNode;
 import antlr.MxParserVisitor;
 import antlr.MxParser;
-import antlr.MxParserBaseVisitor;
 import Utility.position;
 import Utility.errors.syntaxError;
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -47,13 +46,6 @@ public class ASTBuilder implements MxParserVisitor<ASTNode> {
             return null;
     }
 
-    @Override
-    public ASTNode visitProgramMain(MxParser.ProgramMainContext ctx) {
-        if (ctx.funcDefMain() != null)
-            return visit(ctx.funcDefMain());
-        else
-            return null;
-    }
 
     @Override
     public ASTNode visitVarDef(MxParser.VarDefContext ctx) {
@@ -84,12 +76,6 @@ public class ASTBuilder implements MxParserVisitor<ASTNode> {
     public ASTNode visitFuncDef(MxParser.FuncDefContext ctx) {
         funcDefNode node = new funcDefNode(new position(ctx), ctx.Identifier().getText(), ctx.returnType() != null ? (typeNode) visit(ctx.returnType()) : null,
                 (codeBlockNode) visit(ctx.codeBlock()), ctx.paramGroup() != null ? ((varDefNode) visit(ctx.paramGroup())).varDefList : new ArrayList<>());
-        return node;
-    }
-
-    @Override
-    public ASTNode visitFuncDefMain(MxParser.FuncDefMainContext ctx) {
-        funcDefMainNode node = new funcDefMainNode(new position(ctx), "main", ctx.codeBlock() != null ? (codeBlockNode) visit(ctx.codeBlock()) : null);
         return node;
     }
 
@@ -377,12 +363,6 @@ public class ASTBuilder implements MxParserVisitor<ASTNode> {
             return visit(ctx.literal());
     }
 
-    @Override
-    public ASTNode visitIdentifier(MxParser.IdentifierContext ctx) {
-        if (Objects.equals(ctx.Identifier().getText(), "main"))
-            return new mainNode(new position(ctx));
-        else return new varExpNode(new position(ctx), ctx.Identifier().getText());
-    }
 
     @Override
     public ASTNode visit(ParseTree parseTree) {

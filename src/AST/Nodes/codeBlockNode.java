@@ -4,7 +4,7 @@ import Utility.position;
 
 import java.util.ArrayList;
 
-public class codeBlockNode extends ASTNode{
+public class codeBlockNode extends SentenceNode{
     public ArrayList<SentenceNode> sentencesList=new ArrayList<>();
 
     public codeBlockNode(position pos_in){

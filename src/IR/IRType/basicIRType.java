@@ -9,12 +9,12 @@ public abstract class basicIRType {
 
     }
 
-//    public abstract int size();
+    public abstract int size();
 
     public abstract String intoString();
 
     public abstract boolean sameType(basicIRType t);
 
-//    public abstract operand getInit();
+    public abstract operand getInit();
 
 }

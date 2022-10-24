@@ -14,4 +14,8 @@ public abstract class operand {
     public abstract String intoString();
 
     public abstract boolean sameOperand(operand o);
+
+    public boolean isConst(){
+        return this instanceof constBool|| this instanceof constInt || this instanceof constString;
+    }
 }

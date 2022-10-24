@@ -2,6 +2,7 @@ package AST;
 
 import AST.Nodes.typeNode;
 import AST.Symbols.*;
+import AST.Types.arrayType;
 import AST.Types.basicType;
 
 import Utility.errors.semanticError;
@@ -51,7 +52,12 @@ public class Scope {
             throw new semanticError("type undefined", pos_in);
     }
 
-    public basicType getType(typeNode node_in)
+    public basicType getType(typeNode node_in){
+        if(node_in.dimension==0)
+            return typeMap.get(node_in.basicTypeName);
+        else
+            return new arrayType(typeMap.get(node_in.basicTypeName),node_in.dimension);
+    }
 
     public void addVariable(String name_in, varSymbol value_in, position pos_in) {
         if (this.containType(name_in, pos_in, true))

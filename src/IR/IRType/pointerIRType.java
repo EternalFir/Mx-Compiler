@@ -1,12 +1,17 @@
 package IR.IRType;
 
 import IR.operand.operand;
+import IR.operand.Null;
 
 public class pointerIRType extends basicIRType {
     basicIRType ptrType;
 
     public pointerIRType(basicIRType pointerType_in) {
         ptrType = pointerType_in;
+    }
+
+    public int size(){
+        return 32;
     }
 
     @Override
@@ -21,5 +26,9 @@ public class pointerIRType extends basicIRType {
         } else {
             return false;
         }
+    }
+
+    public operand getInit(){
+        return new Null();
     }
 }
