@@ -82,6 +82,10 @@ public class semanticChecker implements ASTVisitor {
             throw new semanticError("void variable", node.pos);
         if (node.expression != null) {
             node.expression.accept(this);
+//            if(node.expression.type==null){
+//                System.out.println(node.expression.pos.intostring());
+//                System.out.println(node.expression.toString());
+//            }
             if (!node.expression.type.sameType(varType))
                 throw new semanticError("wrong variable init", node.pos);
         }
@@ -121,6 +125,9 @@ public class semanticChecker implements ASTVisitor {
             currentScope = new Scope(currentScope);
         else
             currentScope = new Scope(null);
+        boolean isLambdaNowReserve = isLambdaNow;
+        boolean returnDoneReserve = returnDone;
+        basicType lambdaTypeReserve=lambdaType;
         isLambdaNow = true;
         returnDone = false;
         for (varDefSubNode i : node.paramList) {
@@ -151,8 +158,11 @@ public class semanticChecker implements ASTVisitor {
                     throw new semanticError("parameter type error",node.pos);
             }
         }
-        isLambdaNow = false;
-        lambdaType = null;
+        if(node.type==null)
+            node.type=new primitiveType("void");
+        isLambdaNow = isLambdaNowReserve;
+        lambdaType = lambdaTypeReserve;
+        returnDone=returnDoneReserve;
     }
 
     @Override

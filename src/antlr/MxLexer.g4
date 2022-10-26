@@ -90,7 +90,7 @@ WhiteSpace : (' '|'\t')+ -> skip;
 NewLine : ('\r\n'|'\n') -> skip;
 
 // 4.Comments
-LineComment : '//' .*? '\r'? '\n' -> skip;
+LineComment : '//' (~'\n')* -> skip;
 BlockComment : '/*' .*? '*/' -> skip;
 
 
