@@ -1,4 +1,4 @@
-// Generated from D:/cys/SJTU/ÉÏ¿Î/±àÒëÆ÷/Compiler/Mx-Compiler/src/antlr\MxParser.g4 by ANTLR 4.10.1
+
 package antlr;
 import org.antlr.v4.runtime.tree.AbstractParseTreeVisitor;
 
