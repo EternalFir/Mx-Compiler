@@ -17,7 +17,7 @@ fragment BINARYDIGIT : [01];
 
 // TypeLiterals
 BoolTypeLiteral : TRUE|FALSE;
-IntTypeLiteral : (('-')?NONZERODIGIT DIGIT*)|'0';
+IntTypeLiteral : NONZERODIGIT DIGIT* | '0';
 UnsignedIntTypeLiteral : (NONZERODIGIT DIGIT*);
 NullTypeLiteral : NULL;
 StringTypeLiteral : '"' ('\\"' | '\\\\' | '\\n' | ~[\\])*? '"';
