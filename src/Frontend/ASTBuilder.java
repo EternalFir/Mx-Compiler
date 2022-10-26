@@ -104,8 +104,9 @@ public class ASTBuilder extends MxParserBaseVisitor<ASTNode> {
 
     @Override
     public ASTNode visitLambdaDef(MxParser.LambdaDefContext ctx) {
-        lambdaDefNode node = new lambdaDefNode(new position(ctx), Objects.equals(ctx.ifAnd.getText(), "&"),
-                ctx.codeBlock() != null ? (codeBlockNode) visit(ctx.codeBlock()) : null, ctx.paramGroup() != null ? ((varDefNode) visit(ctx.paramGroup())).varDefList : new ArrayList<>(),
+        lambdaDefNode node = new lambdaDefNode(new position(ctx), ctx.ifAnd!=null?Objects.equals(ctx.ifAnd.getText(), "&"):false,
+                ctx.codeBlock() != null ? (codeBlockNode) visit(ctx.codeBlock()) : null,
+                ctx.paramGroup() != null ? ((varDefNode) visit(ctx.paramGroup())).varDefList : new ArrayList<>(),
                 ctx.expressionGroup() != null ? (expressionGroupNode) visit(ctx.expressionGroup()) : new expressionGroupNode(new position(ctx)));
         return node;
     }

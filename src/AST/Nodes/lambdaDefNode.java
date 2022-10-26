@@ -7,7 +7,7 @@ import Utility.position;
 
 import java.util.ArrayList;
 
-public class lambdaDefNode extends DefNode {
+public class lambdaDefNode extends ExpressionNode {
     public boolean ifAnd;
     public codeBlockNode codeBlock;
     public ArrayList<varDefSubNode> paramList;

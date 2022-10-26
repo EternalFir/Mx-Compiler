@@ -20,6 +20,10 @@ public class semanticChecker implements ASTVisitor {
     public int loopDepth = 0;
     IR ir = new IR();
 
+    public boolean isLambdaNow = false;
+
+    public basicType lambdaType = null;
+
     public semanticChecker(Scope scope_in) {
         globalScope = scope_in;
     }
@@ -112,7 +116,43 @@ public class semanticChecker implements ASTVisitor {
 
     @Override
     public void visit(lambdaDefNode node) {
-
+        Scope scopeBefore = currentScope;
+        if (node.ifAnd)
+            currentScope = new Scope(currentScope);
+        else
+            currentScope = new Scope(null);
+        isLambdaNow = true;
+        returnDone = false;
+        for (varDefSubNode i : node.paramList) {
+            i.varSymbol = new varSymbol(i.name, globalScope.getType(i.type));
+            currentScope.addVariable(i.name, i.varSymbol, i.pos);
+        }
+        node.codeBlock.accept(this);
+        if(returnDone){
+            node.type=lambdaType;
+        }else{
+            node.type=new primitiveType("void");
+        }
+        if (node.ifAnd)
+            currentScope = currentScope.parentScope;
+        else
+            currentScope = scopeBefore;
+        node.expList.forEach(x -> x.accept(this));
+        if (node.paramList.size() != node.expList.size())
+            throw new semanticError("paramenter size not match", node.pos);
+        for (int i = 0; i < node.paramList.size(); i++) {
+            if(node.paramList.get(i).type.dimension==0){
+                basicType temp=new primitiveType(node.paramList.get(i).type.basicTypeName);
+                if(!temp.sameType(node.expList.get(i).type))
+                    throw new semanticError("parameter type error",node.pos);
+            }else {
+                basicType temp=new arrayType(new primitiveType(node.paramList.get(i).type.basicTypeName),node.paramList.get(i).type.dimension);
+                if(!temp.sameType(node.expList.get(i).type))
+                    throw new semanticError("parameter type error",node.pos);
+            }
+        }
+        isLambdaNow = false;
+        lambdaType = null;
     }
 
     @Override
@@ -181,13 +221,22 @@ public class semanticChecker implements ASTVisitor {
     @Override
     public void visit(returnSentNode node) {
         returnDone = true;
-        if (node.value != null) {
-            node.value.accept(this);
-            if (!node.value.type.sameType(currentReturnType))
-                throw new semanticError("return type error", node.pos);
+        if (isLambdaNow) {
+            if (node.value != null) {
+                node.value.accept(this);
+                lambdaType = node.value.type;
+            } else {
+                lambdaType = new primitiveType("void");
+            }
         } else {
-            if (!currentReturnType.isVoid())
-                throw new semanticError("return type error", node.pos);
+            if (node.value != null) {
+                node.value.accept(this);
+                if (!node.value.type.sameType(currentReturnType))
+                    throw new semanticError("return type error", node.pos);
+            } else {
+                if (!currentReturnType.isVoid())
+                    throw new semanticError("return type error", node.pos);
+            }
         }
     }
 
@@ -238,42 +287,42 @@ public class semanticChecker implements ASTVisitor {
             case "&":
             case "^":
             case "|":
-                if(!(node.lexp.type.isInt() && node.rexp.type.isInt()))
-                    throw new semanticError("require int type",node.pos);
-                node.type=new primitiveType("int");
+                if (!(node.lexp.type.isInt() && node.rexp.type.isInt()))
+                    throw new semanticError("require int type", node.pos);
+                node.type = new primitiveType("int");
                 break;
             case "+":
-                if(!((node.lexp.type.isInt()&& node.rexp.type.isInt())||(node.lexp.type.isString()&& node.rexp.type.isString())))
-                    throw new semanticError("require int or string type",node.pos);
-                node.type=node.lexp.type;
+                if (!((node.lexp.type.isInt() && node.rexp.type.isInt()) || (node.lexp.type.isString() && node.rexp.type.isString())))
+                    throw new semanticError("require int or string type", node.pos);
+                node.type = node.lexp.type;
                 break;
             case "<":
             case ">":
             case "<=":
             case ">=":
-                if(!((node.lexp.type.isInt()&& node.rexp.type.isInt())||(node.lexp.type.isString()&& node.rexp.type.isString())))
-                    throw new semanticError("require int or string type",node.pos);
-                node.type=new primitiveType("bool");
+                if (!((node.lexp.type.isInt() && node.rexp.type.isInt()) || (node.lexp.type.isString() && node.rexp.type.isString())))
+                    throw new semanticError("require int or string type", node.pos);
+                node.type = new primitiveType("bool");
                 break;
             case "&&":
             case "||":
-                if(!(node.lexp.type.isBool()&& node.rexp.type.isBool()))
-                    throw new semanticError("require bool type",node.pos);
-                node.type=new primitiveType("bool");
+                if (!(node.lexp.type.isBool() && node.rexp.type.isBool()))
+                    throw new semanticError("require bool type", node.pos);
+                node.type = new primitiveType("bool");
                 break;
             case "==":
             case "!=":
-                if(!node.lexp.type.sameType(node.rexp.type))
-                    throw new semanticError("require same type",node.pos);
-                node.type=new primitiveType("bool");
+                if (!node.lexp.type.sameType(node.rexp.type))
+                    throw new semanticError("require same type", node.pos);
+                node.type = new primitiveType("bool");
                 break;
             case "=":
-                if(!node.lexp.type.sameType(node.rexp.type))
-                    throw new semanticError("require same type",node.pos);
-                if(!node.lexp.isAssignable)
-                    throw new semanticError("not assignable",node.pos);
-                node.type=node.lexp.type;
-                node.isAssignable=true;
+                if (!node.lexp.type.sameType(node.rexp.type))
+                    throw new semanticError("require same type", node.pos);
+                if (!node.lexp.isAssignable)
+                    throw new semanticError("not assignable", node.pos);
+                node.type = node.lexp.type;
+                node.isAssignable = true;
                 break;
             default:
                 break;
@@ -285,45 +334,45 @@ public class semanticChecker implements ASTVisitor {
         node.caller.accept(this);
 
         // builtInMethods
-        if(node.caller.type instanceof arrayType && node.isFunc && node.callee.equals("size")){
+        if (node.caller.type instanceof arrayType && node.isFunc && node.callee.equals("size")) {
             funcSymbol sizeFunc = new funcSymbol("size");
-            sizeFunc.returnType=new primitiveType("int");
-            node.type=sizeFunc;
+            sizeFunc.returnType = new primitiveType("int");
+            node.type = sizeFunc;
             return;
         }
-        if(node.caller.type.isString() && node.isFunc && node.callee.equals("length")){
-            funcSymbol lengthFunc=new funcSymbol("length");
+        if (node.caller.type.isString() && node.isFunc && node.callee.equals("length")) {
+            funcSymbol lengthFunc = new funcSymbol("length");
             lengthFunc.returnType = new primitiveType("int");
-            node.type=lengthFunc;
-            lengthFunc.function=new Function("__builtIn__stringLength");
-            lengthFunc.function.retyrnType=ir.getType(lengthFunc.returnType);
+            node.type = lengthFunc;
+            lengthFunc.function = new Function("__builtIn__stringLength");
+            lengthFunc.function.retyrnType = ir.getType(lengthFunc.returnType);
             return;
         }
-        if(node.caller.type.isString() && node.isFunc && node.callee.equals("substring")){
-            funcSymbol substringFunc= new funcSymbol("substring");
-            substringFunc.returnType=new primitiveType("string");
-            substringFunc.paramList.add(new varSymbol("left",new primitiveType("int")));
-            substringFunc.paramList.add(new varSymbol("right",new primitiveType("int")));
-            node.type=substringFunc;
-            substringFunc.function=new Function("__builtIn__substring");
-            substringFunc.function.retyrnType=ir.getType(substringFunc.returnType);
+        if (node.caller.type.isString() && node.isFunc && node.callee.equals("substring")) {
+            funcSymbol substringFunc = new funcSymbol("substring");
+            substringFunc.returnType = new primitiveType("string");
+            substringFunc.paramList.add(new varSymbol("left", new primitiveType("int")));
+            substringFunc.paramList.add(new varSymbol("right", new primitiveType("int")));
+            node.type = substringFunc;
+            substringFunc.function = new Function("__builtIn__substring");
+            substringFunc.function.retyrnType = ir.getType(substringFunc.returnType);
             return;
         }
-        if(node.caller.type.isString() && node.isFunc && node.callee.equals("parseInt")){
-            funcSymbol parseIntFunc= new funcSymbol("parseInt");
-            parseIntFunc.returnType=new primitiveType("int");
-            node.type=parseIntFunc;
-            parseIntFunc.function=new Function("__builtIn__parseInt");
-            parseIntFunc.function.retyrnType=ir.getType(parseIntFunc.returnType);
+        if (node.caller.type.isString() && node.isFunc && node.callee.equals("parseInt")) {
+            funcSymbol parseIntFunc = new funcSymbol("parseInt");
+            parseIntFunc.returnType = new primitiveType("int");
+            node.type = parseIntFunc;
+            parseIntFunc.function = new Function("__builtIn__parseInt");
+            parseIntFunc.function.retyrnType = ir.getType(parseIntFunc.returnType);
             return;
         }
-        if(node.caller.type.isString() && node.isFunc&& node.callee.equals("ord")){
-            funcSymbol ordFunc=new funcSymbol("ord");
-            ordFunc.returnType=new primitiveType("int");
-            ordFunc.paramList.add(new varSymbol("pos",new primitiveType("int")));
-            node.type=ordFunc;
-            ordFunc.function=new Function("__builtIn__stringOrd");
-            ordFunc.function.retyrnType=ir.getType(ordFunc.returnType);
+        if (node.caller.type.isString() && node.isFunc && node.callee.equals("ord")) {
+            funcSymbol ordFunc = new funcSymbol("ord");
+            ordFunc.returnType = new primitiveType("int");
+            ordFunc.paramList.add(new varSymbol("pos", new primitiveType("int")));
+            node.type = ordFunc;
+            ordFunc.function = new Function("__builtIn__stringOrd");
+            ordFunc.function.retyrnType = ir.getType(ordFunc.returnType);
             return;
         }
 
@@ -341,7 +390,7 @@ public class semanticChecker implements ASTVisitor {
             else
                 throw new semanticError("no such symbol", node.pos);
 
-            node.isAssignable=true;
+            node.isAssignable = true;
         }
     }
 
@@ -366,7 +415,7 @@ public class semanticChecker implements ASTVisitor {
             throw new semanticError("not assignable", node.pos);
         node.type = node.exp.type;
 
-        node.isAssignable=false;
+        node.isAssignable = false;
     }
 
     @Override
@@ -376,7 +425,7 @@ public class semanticChecker implements ASTVisitor {
             throw new semanticError("require int type", node.pos);
         if (!node.exp.isAssignable)
             throw new semanticError("not assignable", node.pos);
-        node.isAssignable=true;
+        node.isAssignable = true;
         node.type = node.exp.type;
     }
 
@@ -426,7 +475,7 @@ public class semanticChecker implements ASTVisitor {
         else
             node.type = new arrayType(arrayType.atomType, arrayType.dimen - 1);
 
-        node.isAssignable=true;
+        node.isAssignable = true;
     }
 
     @Override
@@ -436,37 +485,37 @@ public class semanticChecker implements ASTVisitor {
 
     @Override
     public void visit(boolLiteralNode node) {
-        node.type=new primitiveType("bool");
+        node.type = new primitiveType("bool");
     }
 
     @Override
     public void visit(intLiteralNode node) {
-        node.type=new primitiveType("int");
+        node.type = new primitiveType("int");
     }
 
     @Override
     public void visit(stringLiteralNode node) {
-        node.type=new primitiveType("string");
+        node.type = new primitiveType("string");
     }
 
     @Override
     public void visit(nullLiteralNode node) {
-        node.type=new primitiveType("null");
+        node.type = new primitiveType("null");
     }
 
     @Override
     public void visit(thisExpNode node) {
-        if(currentClass !=null)
-            node.type=currentClass;
+        if (currentClass != null)
+            node.type = currentClass;
         else
-            throw new semanticError("not in class",node.pos);
+            throw new semanticError("not in class", node.pos);
     }
 
     @Override
     public void visit(varExpNode node) {
         node.type = currentScope.getVariable(node.name, node.pos, true).type;
         node.varSymbol = currentScope.getVariable(node.name, node.pos, true);
-        node.isAssignable=true;
+        node.isAssignable = true;
     }
 
 //    @Override
