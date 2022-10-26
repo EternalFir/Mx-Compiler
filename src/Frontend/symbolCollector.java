@@ -258,8 +258,8 @@ public class symbolCollector implements ASTVisitor {
 
     }
 
-    @Override
-    public void visit(mainNode node) {
-
-    }
+//    @Override
+//    public void visit(mainNode node) {
+//
+//    }
 }

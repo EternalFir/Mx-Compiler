@@ -11,6 +11,6 @@ public class arrayType extends basicType {
 
     @Override
     public boolean sameType(basicType t) {
-        return t.isNull() || ((t instanceof arrayType) && (this.atomType.sameType(((arrayType) t).atomType)) && this.dimen == ((arrayType) t).dimen);
+        return t.isNull() || ((t instanceof arrayType) && (this.atomType.sameType(((arrayType) t).atomType) && this.dimen == ((arrayType) t).dimen));
     }
 }

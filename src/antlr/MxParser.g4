@@ -57,15 +57,16 @@ expression : baseExp                                                          #s
 expressionGroup : expression (',' expression)*;
 
 // 复杂的应优先匹配
-creation : NEW baseType ('[' expression ']')+ ('['']' )*  #arrayCreation
-         | NEW baseType '(' ')'                           #classCreation
-         | NEW baseType                                   #simpleCreation
+creation : NEW baseType ( '[' expression ']' )+ ( '[' ']' )+ ( '[' expression ']' )   #errorCreation
+         | NEW baseType ( '[' expression ']' )+ ( '[' ']' )*                          #arrayCreation
+         | NEW baseType ( '(' ')' )                                                   #classCreation
+         | NEW baseType                                                               #simpleCreation
          ;
 
 paramGroup : param (',' param)*;
 param : type Identifier;
 
-type : baseType('['']')*;
+type : baseType('[' ']')*;
 baseType : INT | BOOL | STRING | Identifier;
 returnType : type | VOID;
 

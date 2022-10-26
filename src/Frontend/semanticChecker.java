@@ -78,7 +78,7 @@ public class semanticChecker implements ASTVisitor {
             throw new semanticError("void variable", node.pos);
         if (node.expression != null) {
             node.expression.accept(this);
-            if (!node.expression.type.equals(varType))
+            if (!node.expression.type.sameType(varType))
                 throw new semanticError("wrong variable init", node.pos);
         }
         node.varSymbol = new varSymbol(node.name, varType);
@@ -183,7 +183,7 @@ public class semanticChecker implements ASTVisitor {
         returnDone = true;
         if (node.value != null) {
             node.value.accept(this);
-            if (!node.value.type.equals(currentReturnType))
+            if (!node.value.type.sameType(currentReturnType))
                 throw new semanticError("return type error", node.pos);
         } else {
             if (!currentReturnType.isVoid())
@@ -284,6 +284,49 @@ public class semanticChecker implements ASTVisitor {
     public void visit(memberExpNode node) {
         node.caller.accept(this);
 
+        // builtInMethods
+        if(node.caller.type instanceof arrayType && node.isFunc && node.callee.equals("size")){
+            funcSymbol sizeFunc = new funcSymbol("size");
+            sizeFunc.returnType=new primitiveType("int");
+            node.type=sizeFunc;
+            return;
+        }
+        if(node.caller.type.isString() && node.isFunc && node.callee.equals("length")){
+            funcSymbol lengthFunc=new funcSymbol("length");
+            lengthFunc.returnType = new primitiveType("int");
+            node.type=lengthFunc;
+            lengthFunc.function=new Function("__builtIn__stringLength");
+            lengthFunc.function.retyrnType=ir.getType(lengthFunc.returnType);
+            return;
+        }
+        if(node.caller.type.isString() && node.isFunc && node.callee.equals("substring")){
+            funcSymbol substringFunc= new funcSymbol("substring");
+            substringFunc.returnType=new primitiveType("string");
+            substringFunc.paramList.add(new varSymbol("left",new primitiveType("int")));
+            substringFunc.paramList.add(new varSymbol("right",new primitiveType("int")));
+            node.type=substringFunc;
+            substringFunc.function=new Function("__builtIn__substring");
+            substringFunc.function.retyrnType=ir.getType(substringFunc.returnType);
+            return;
+        }
+        if(node.caller.type.isString() && node.isFunc && node.callee.equals("parseInt")){
+            funcSymbol parseIntFunc= new funcSymbol("parseInt");
+            parseIntFunc.returnType=new primitiveType("int");
+            node.type=parseIntFunc;
+            parseIntFunc.function=new Function("__builtIn__parseInt");
+            parseIntFunc.function.retyrnType=ir.getType(parseIntFunc.returnType);
+            return;
+        }
+        if(node.caller.type.isString() && node.isFunc&& node.callee.equals("ord")){
+            funcSymbol ordFunc=new funcSymbol("ord");
+            ordFunc.returnType=new primitiveType("int");
+            ordFunc.paramList.add(new varSymbol("pos",new primitiveType("int")));
+            node.type=ordFunc;
+            ordFunc.function=new Function("__builtIn__stringOrd");
+            ordFunc.function.retyrnType=ir.getType(ordFunc.returnType);
+            return;
+        }
+
         if (!(node.caller.type instanceof classType))
             throw new semanticError("not a class", node.pos);
         classType classType = (classType) node.caller.type;
@@ -297,6 +340,8 @@ public class semanticChecker implements ASTVisitor {
                 node.type = classType.varMap.get(node.callee).type;
             else
                 throw new semanticError("no such symbol", node.pos);
+
+            node.isAssignable=true;
         }
     }
 
@@ -320,6 +365,8 @@ public class semanticChecker implements ASTVisitor {
         if (!node.exp.isAssignable)
             throw new semanticError("not assignable", node.pos);
         node.type = node.exp.type;
+
+        node.isAssignable=false;
     }
 
     @Override
@@ -329,6 +376,7 @@ public class semanticChecker implements ASTVisitor {
             throw new semanticError("require int type", node.pos);
         if (!node.exp.isAssignable)
             throw new semanticError("not assignable", node.pos);
+        node.isAssignable=true;
         node.type = node.exp.type;
     }
 
@@ -345,7 +393,7 @@ public class semanticChecker implements ASTVisitor {
         if (func.paramList.size() != node.expList.size())
             throw new semanticError("paramenter size not match", node.pos);
         for (int i = 0; i < func.paramList.size(); i++) {
-            if (!func.paramList.get(i).type.equals(node.expList.get(i).type))
+            if (!func.paramList.get(i).type.sameType(node.expList.get(i).type))
                 throw new semanticError("parameter type error", node.pos);
         }
         node.type = func.returnType;
@@ -377,6 +425,8 @@ public class semanticChecker implements ASTVisitor {
             node.type = arrayType.atomType;
         else
             node.type = new arrayType(arrayType.atomType, arrayType.dimen - 1);
+
+        node.isAssignable=true;
     }
 
     @Override
@@ -416,10 +466,11 @@ public class semanticChecker implements ASTVisitor {
     public void visit(varExpNode node) {
         node.type = currentScope.getVariable(node.name, node.pos, true).type;
         node.varSymbol = currentScope.getVariable(node.name, node.pos, true);
+        node.isAssignable=true;
     }
 
-    @Override
-    public void visit(mainNode node) {
-
-    }
+//    @Override
+//    public void visit(mainNode node) {
+//
+//    }
 }

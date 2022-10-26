@@ -2,6 +2,7 @@ package Frontend;
 
 import AST.Nodes.*;
 import AST.Nodes.ASTNode;
+import antlr.MxParserBaseVisitor;
 import antlr.MxParserVisitor;
 import antlr.MxParser;
 import Utility.position;
@@ -16,7 +17,7 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 
-public class ASTBuilder implements MxParserVisitor<ASTNode> {
+public class ASTBuilder extends MxParserBaseVisitor<ASTNode> {
 
     @Override
     public ASTNode visitProgram(MxParser.ProgramContext ctx) {
@@ -64,11 +65,12 @@ public class ASTBuilder implements MxParserVisitor<ASTNode> {
     @Override
     public ASTNode visitVarDefSub(MxParser.VarDefSubContext ctx) {
         varDefSubNode node = new varDefSubNode(new position(ctx));
-        node.name = ctx.getText();
+        node.name = ctx.Identifier().getText();
         if (ctx.expression() != null) {
             node.expression = (ExpressionNode) visit(ctx.expression());
+        }else{
+            node.expression=null;
         }
-        ;
         return node;
     }
 
@@ -241,6 +243,10 @@ public class ASTBuilder implements MxParserVisitor<ASTNode> {
     public ASTNode visitFuncExp(MxParser.FuncExpContext ctx) {
         funcExpNode node = new funcExpNode(new position(ctx));
         node.master = (ExpressionNode) visit(ctx.expression());
+        if(node.master instanceof memberExpNode){
+            ((memberExpNode)node.master).isFunc=true;
+            node.master.isAssignable=false;
+        }
         if (ctx.expressionGroup() != null)
             node.expList = ((expressionGroupNode) visit(ctx.expressionGroup())).expList;
         else
@@ -272,6 +278,10 @@ public class ASTBuilder implements MxParserVisitor<ASTNode> {
             }
         }
         return node;
+    }
+
+    public ASTNode visitErrorCreation(MxParser.ErrorCreationContext ctx) {
+        throw new syntaxError("array creation error", new position(ctx));
     }
 
     @Override
@@ -363,24 +373,24 @@ public class ASTBuilder implements MxParserVisitor<ASTNode> {
             return visit(ctx.literal());
     }
 
-
-    @Override
-    public ASTNode visit(ParseTree parseTree) {
-        return null;
-    }
-
-    @Override
-    public ASTNode visitChildren(RuleNode ruleNode) {
-        return null;
-    }
-
-    @Override
-    public ASTNode visitTerminal(TerminalNode terminalNode) {
-        return null;
-    }
-
-    @Override
-    public ASTNode visitErrorNode(ErrorNode errorNode) {
-        return null;
-    }
+//
+//    @Override
+//    public ASTNode visit(ParseTree parseTree) {
+//        return null;
+//    }
+//
+//    @Override
+//    public ASTNode visitChildren(RuleNode ruleNode) {
+//        return null;
+//    }
+//
+//    @Override
+//    public ASTNode visitTerminal(TerminalNode terminalNode) {
+//        return null;
+//    }
+//
+//    @Override
+//    public ASTNode visitErrorNode(ErrorNode errorNode) {
+//        return null;
+//    }
 }

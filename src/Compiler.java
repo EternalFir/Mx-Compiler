@@ -28,18 +28,19 @@ public class Compiler {
             parser.removeErrorListeners();
             parser.addErrorListener(new errorListener());
             ParseTree parserTreeRoot = parser.program();
+
             ASTBuilder ASTBuilder = new ASTBuilder();
             ASTTreeRoot = (programNode) ASTBuilder.visit(parserTreeRoot);
+
             Scope globalScope=new Scope(null);
             new symbolCollector(globalScope).visit(ASTTreeRoot);
             new typeCollector(globalScope).visit(ASTTreeRoot);
             globalScope.varMap.clear();
             new semanticChecker(globalScope).visit(ASTTreeRoot);
 
-
         } catch (basicError error) {
             System.err.println(error.intoString());
-            throw new RuntimeException();
+            throw error;
         }
 
     }

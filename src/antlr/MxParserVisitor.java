@@ -212,6 +212,13 @@ public interface MxParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitExpressionGroup(MxParser.ExpressionGroupContext ctx);
 	/**
+	 * Visit a parse tree produced by the {@code errorCreation}
+	 * labeled alternative in {@link MxParser#creation}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitErrorCreation(MxParser.ErrorCreationContext ctx);
+	/**
 	 * Visit a parse tree produced by the {@code arrayCreation}
 	 * labeled alternative in {@link MxParser#creation}.
 	 * @param ctx the parse tree

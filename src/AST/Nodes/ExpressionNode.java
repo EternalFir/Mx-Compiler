@@ -1,6 +1,7 @@
 package AST.Nodes;
 
 import AST.Types.basicType;
+import IR.operand.operand;
 
 
 import Utility.position;
@@ -8,6 +9,8 @@ import Utility.position;
 public abstract class ExpressionNode extends ASTNode {
     public basicType type;
     public boolean isAssignable;
+
+    public operand operand;
 
     public ExpressionNode(position pos_in) {
         super(pos_in);

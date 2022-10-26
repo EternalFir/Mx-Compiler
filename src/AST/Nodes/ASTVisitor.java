@@ -66,5 +66,5 @@ public interface ASTVisitor {
 
     void visit(varExpNode node);
 
-    void visit(mainNode node);
+//    void visit(mainNode node);
 }

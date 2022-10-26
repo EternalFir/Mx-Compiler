@@ -12,6 +12,6 @@ public abstract class  basicError extends RuntimeException{
     }
 
     public String intoString() {
-        return str + "at: " + pos.intostring();
+        return str + " at: " + pos.intostring();
     }
 }

@@ -350,6 +350,18 @@ public interface MxParserListener extends ParseTreeListener {
 	 */
 	void exitExpressionGroup(MxParser.ExpressionGroupContext ctx);
 	/**
+	 * Enter a parse tree produced by the {@code errorCreation}
+	 * labeled alternative in {@link MxParser#creation}.
+	 * @param ctx the parse tree
+	 */
+	void enterErrorCreation(MxParser.ErrorCreationContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code errorCreation}
+	 * labeled alternative in {@link MxParser#creation}.
+	 * @param ctx the parse tree
+	 */
+	void exitErrorCreation(MxParser.ErrorCreationContext ctx);
+	/**
 	 * Enter a parse tree produced by the {@code arrayCreation}
 	 * labeled alternative in {@link MxParser#creation}.
 	 * @param ctx the parse tree

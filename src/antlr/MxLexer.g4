@@ -41,8 +41,6 @@ BREAK : 'break';
 CONTINUE : 'continue';
 RETURN : 'return';
 
-MAIN : 'main';
-
 //Keywords : VOID|BOOL|INT|STRING|NEW|CLASS|NULL|TRUE|FALSE|THIS|IF|ELSE|FOR|WHILE|BREAK|CONTINUE|RETURN;
 
 // 5.Idetifier
