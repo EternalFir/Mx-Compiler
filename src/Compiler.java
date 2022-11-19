@@ -28,10 +28,8 @@ public class Compiler {
             parser.removeErrorListeners();
             parser.addErrorListener(new errorListener());
             ParseTree parserTreeRoot = parser.program();
-
             ASTBuilder ASTBuilder = new ASTBuilder();
             ASTTreeRoot = (programNode) ASTBuilder.visit(parserTreeRoot);
-
             Scope globalScope=new Scope(null);
             new symbolCollector(globalScope).visit(ASTTreeRoot);
             new typeCollector(globalScope).visit(ASTTreeRoot);

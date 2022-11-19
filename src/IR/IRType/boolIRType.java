@@ -10,12 +10,12 @@ public class boolIRType extends basicIRType {
     }
 
     public int size() {
-        return 1;
+        return 32;
     }
 
     @Override
     public String intoString() {
-        return "bool";
+        return "i1";
     }
 
     @Override

@@ -16,7 +16,7 @@ public class intIRType extends basicIRType{
 
     @Override
     public String intoString() {
-        return "int"+size;
+        return "i"+size;
     }
 
     @Override

@@ -30,9 +30,9 @@ public class register extends operand {
 
     public String intoString() {
         if (isGlobal)
-            return "global:" + name;
+            return "@" + name; //global
         else
-            return "private:" + name;
+            return "%" + name; // private
     }
 
     @Override

@@ -27,18 +27,18 @@ public class classIRType extends basicIRType {
         return size;
     }
 
-    public int getOffset(int id_in) {
-        int out = 0;
-        for (int i = 0; i < id_in; i++)
-            out += var.get(i).irType.size();
-        return out;
-    }
-
     public int getID(String name_in){
         for(int i =0;i<var.size();i++)
             if(var.get(i).name.equals(name+"."+name_in))
                 return i;
         return -1;
+    }
+
+    public int getOffset(int id_in) {
+        int out = 0;
+        for (int i = 0; i < id_in; i++)
+            out += var.get(i).irType.size();
+        return out;
     }
 
     public register getVarRegister(String name_in){
@@ -50,7 +50,7 @@ public class classIRType extends basicIRType {
     }
 
     public String intoString() {
-        return "Struct." + name;
+        return "%struct." + name;
     }
 
     public boolean sameType(basicIRType t) {

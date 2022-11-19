@@ -12,7 +12,8 @@ public class constBool extends operand{
     public String intoString(){
         if(value)
             return "1";
-        else return "0";
+        else
+            return "0";
     }
 
     public boolean sameOperand(operand o){

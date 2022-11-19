@@ -14,7 +14,7 @@ public class stringIRType extends basicIRType {
 
     @Override
     public String intoString() {
-        return "string";
+        return "i8*";
     }
 
     @Override
