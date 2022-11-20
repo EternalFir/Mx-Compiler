@@ -1,6 +1,8 @@
 /*.idea/
 
 out
+
+gen
  
 # Compiled class file
 *.class

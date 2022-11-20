@@ -4,7 +4,7 @@ import IR.operand.operand;
 import IR.operand.Null;
 
 public class pointerIRType extends basicIRType {
-    basicIRType ptrType;
+    public basicIRType ptrType;
 
     public pointerIRType(basicIRType pointerType_in) {
         ptrType = pointerType_in;

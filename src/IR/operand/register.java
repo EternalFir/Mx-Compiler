@@ -1,6 +1,6 @@
 package IR.operand;
 
-import IR.instructions.Instruction;
+import IR.instructions.instruction;
 
 import IR.IRType.*;
 
@@ -11,7 +11,7 @@ public class register extends operand {
     public String name;
     public boolean isGlobal = false;
     public boolean isConstPtr = false;
-    public ArrayList<Instruction> assign = new ArrayList<>();
+    public ArrayList<instruction> assign = new ArrayList<>();
     public Stack<register> renamingStack = new Stack<>();
     public int renamingID = 0;
     public boolean used = false;
