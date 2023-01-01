@@ -7,7 +7,7 @@ import IR.IRType.pointerIRType;
 import java.util.ArrayList;
 
 public class GetElementPtr extends instruction {
-    operand base, index;
+    public operand base, index;
     public constInt offset = null;
 
     public GetElementPtr(Block block_in, operand register_in, operand base_in, operand index_in) {

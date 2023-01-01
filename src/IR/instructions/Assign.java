@@ -8,8 +8,8 @@ import java.util.ArrayList;
 public class Assign extends instruction {
     public operand value;
 
-    public Assign(Block block_in, register register_in, operand value_in) {
-        super(block_in, register_in);
+    public Assign(Block block_in, operand register_in, operand value_in) {
+        super(block_in, (register) register_in);
         value = value_in;
     }
 

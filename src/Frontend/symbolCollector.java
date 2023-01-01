@@ -27,47 +27,47 @@ public class symbolCollector implements ASTVisitor {
         printFunc.paramList.add(new varSymbol("string", new primitiveType("string")));
         globalScope.funcMap.put("print", printFunc);
         printFunc.function = new Function("__bulitIn__print");
-        printFunc.function.retyrnType = ir.getType(printFunc.returnType);
+        printFunc.function.returnType = ir.getType(printFunc.returnType);
 
         funcSymbol printlnFunc = new funcSymbol("println");
         printlnFunc.returnType = new primitiveType("void");
         printlnFunc.paramList.add(new varSymbol("string", new primitiveType("string")));
         globalScope.funcMap.put("println", printlnFunc);
         printlnFunc.function = new Function("__builtIn__println");
-        printlnFunc.function.retyrnType = ir.getType(printlnFunc.returnType);
+        printlnFunc.function.returnType = ir.getType(printlnFunc.returnType);
 
         funcSymbol printInt = new funcSymbol("printInt");
         printInt.returnType = new primitiveType("void");
         printInt.paramList.add(new varSymbol("number", new primitiveType("int")));
         globalScope.funcMap.put("printInt", printInt);
         printInt.function = new Function("__builtIn__printInt");
-        printInt.function.retyrnType = ir.getType(printInt.returnType);
+        printInt.function.returnType = ir.getType(printInt.returnType);
 
         funcSymbol printlnInt = new funcSymbol("printlnInt");
         printlnInt.returnType = new primitiveType("void");
         printlnInt.paramList.add(new varSymbol("number", new primitiveType("int")));
         globalScope.funcMap.put("printlnInt", printlnInt);
         printlnInt.function = new Function("__builtIn__printlnInt");
-        printlnInt.function.retyrnType = ir.getType(printlnInt.returnType);
+        printlnInt.function.returnType = ir.getType(printlnInt.returnType);
 
         funcSymbol getInt = new funcSymbol("getInt");
         getInt.returnType = new primitiveType("int");
         globalScope.funcMap.put("getInt", getInt);
         getInt.function = new Function("__bulitIn__getInt");
-        getInt.function.retyrnType = ir.getType(getInt.returnType);
+        getInt.function.returnType = ir.getType(getInt.returnType);
 
         funcSymbol getString = new funcSymbol("getString");
         getString.returnType = new primitiveType("string");
         globalScope.funcMap.put("getString", getString);
         getString.function = new Function("__builtIn__getString");
-        getString.function.retyrnType = ir.getType(getString.returnType);
+        getString.function.returnType = ir.getType(getString.returnType);
 
         funcSymbol toString = new funcSymbol("toString");
         toString.returnType = new primitiveType("string");
         toString.paramList.add(new varSymbol("i", new primitiveType("int")));
         globalScope.funcMap.put("toString", toString);
         toString.function = new Function("__builtIn__toString");
-        toString.function.retyrnType = ir.getType(toString.returnType);
+        toString.function.returnType = ir.getType(toString.returnType);
     }
 
     @Override

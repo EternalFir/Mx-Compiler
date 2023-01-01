@@ -56,7 +56,7 @@ public class semanticChecker implements ASTVisitor {
             currentReturnType = new primitiveType("void");
         node.returnType = currentReturnType;
         node.funcSymbol.function = new Function(node.name);
-        node.funcSymbol.function.retyrnType = ir.getType(node.returnType);
+        node.funcSymbol.function.returnType = ir.getType(node.returnType);
         if (currentClass != null)
             node.funcSymbol.function.classFunc = true;
         returnDone = false;
@@ -355,7 +355,7 @@ public class semanticChecker implements ASTVisitor {
             lengthFunc.returnType = new primitiveType("int");
             node.type = lengthFunc;
             lengthFunc.function = new Function("__builtIn__stringLength");
-            lengthFunc.function.retyrnType = ir.getType(lengthFunc.returnType);
+            lengthFunc.function.returnType = ir.getType(lengthFunc.returnType);
             return;
         }
         if (node.caller.type.isString() && node.isFunc && node.callee.equals("substring")) {
@@ -365,7 +365,7 @@ public class semanticChecker implements ASTVisitor {
             substringFunc.paramList.add(new varSymbol("right", new primitiveType("int")));
             node.type = substringFunc;
             substringFunc.function = new Function("__builtIn__substring");
-            substringFunc.function.retyrnType = ir.getType(substringFunc.returnType);
+            substringFunc.function.returnType = ir.getType(substringFunc.returnType);
             return;
         }
         if (node.caller.type.isString() && node.isFunc && node.callee.equals("parseInt")) {
@@ -373,7 +373,7 @@ public class semanticChecker implements ASTVisitor {
             parseIntFunc.returnType = new primitiveType("int");
             node.type = parseIntFunc;
             parseIntFunc.function = new Function("__builtIn__parseInt");
-            parseIntFunc.function.retyrnType = ir.getType(parseIntFunc.returnType);
+            parseIntFunc.function.returnType = ir.getType(parseIntFunc.returnType);
             return;
         }
         if (node.caller.type.isString() && node.isFunc && node.callee.equals("ord")) {
@@ -382,7 +382,7 @@ public class semanticChecker implements ASTVisitor {
             ordFunc.paramList.add(new varSymbol("pos", new primitiveType("int")));
             node.type = ordFunc;
             ordFunc.function = new Function("__builtIn__stringOrd");
-            ordFunc.function.retyrnType = ir.getType(ordFunc.returnType);
+            ordFunc.function.returnType = ir.getType(ordFunc.returnType);
             return;
         }
 

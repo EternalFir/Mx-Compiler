@@ -20,6 +20,13 @@ public class constString extends operand {
                 .replace("\\\"", "\"");
     }
 
+    public String convert() {
+        return surfaceValue.replace("\\\\", "\\5C")
+                .replace("\\n", "\\0A")
+                .replace("\\r", "\\0D")
+                .replace("\\t", "\\09")
+                .replace("\\\"", "\\22");
+    }
 
     public String intoString() {
         return "getelementptr inbounds ([ " + (innerValue.length() + 1) + " x i8 ], [ " + (innerValue.length() + 1) + " x i8 ]* @" + name + ", i32 0, i32 0)";

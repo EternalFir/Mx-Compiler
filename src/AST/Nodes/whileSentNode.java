@@ -1,10 +1,14 @@
 package AST.Nodes;
 
+import IR.Block;
 import Utility.position;
 
 public class whileSentNode extends SentenceNode {
     public ExpressionNode cond;
     public SentenceNode repeSent;
+
+    public Block destinationBlock;
+    public Block conditionBlock;
 
     public whileSentNode(position pos_in,ExpressionNode cond_in,SentenceNode repe_in){
         super(pos_in);

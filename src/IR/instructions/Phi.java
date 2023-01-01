@@ -11,7 +11,7 @@ public class Phi extends instruction {
     public ArrayList<Block> blocks = new ArrayList<>();
     public ArrayList<operand> values = new ArrayList<>();
     public register phiRegister;
-
+    public boolean isMain = false;
 
     public Phi(Block block_in, register register_in) {
         super(block_in, register_in);

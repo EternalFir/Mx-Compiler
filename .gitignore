@@ -3,6 +3,9 @@
 out
 
 gen
+
+input.mx
+input.cpp
  
 # Compiled class file
 *.class

@@ -22,7 +22,7 @@ public class pointerIRType extends basicIRType {
     @Override
     public boolean sameType(basicIRType t) {
         if (t instanceof pointerIRType) {
-            return (((pointerIRType) t).ptrType instanceof voidIRType) || ((pointerIRType) t).ptrType instanceof pointerIRType;
+            return ((((pointerIRType) t).ptrType instanceof voidIRType) || ((pointerIRType) t).ptrType.sameType(ptrType));
         } else {
             return false;
         }
