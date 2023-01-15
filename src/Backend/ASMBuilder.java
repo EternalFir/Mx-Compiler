@@ -110,6 +110,7 @@ public class ASMBuilder {
             Register rd = getReg(inst.register);
             Register rs1;
             data rs2;
+            // set op
             if (((Binary) inst).op.equals("sdiv")) { // /
                 op = "div";
             } else if (((Binary) inst).op.equals("srem")) { // %
@@ -121,28 +122,32 @@ public class ASMBuilder {
             } else {
                 op = ((Binary) inst).op;
             }
+            // set V
             if (op.equals("mul") || op.equals("div") || op.equals("rem")) {
                 rs1 = getReg(((Binary) inst).lhs);
                 rs2 = getReg(((Binary) inst).rhs);
             } else {
                 if (((Binary) inst).rhs instanceof constInt) {
-                    if (canInImm(((constInt)((Binary)inst).rhs).value)) { // 能放进imm
+                    if (canInImm(((constInt) ((Binary) inst).rhs).value)) { // 能直接放进imm
                         rs1 = getReg(((Binary) inst).lhs);
                         rs2 = new imm(((constInt) ((Binary) inst).rhs).value);
                         if (op.equals("sub")) {
-                            op = "addi";
+                            op = "add";
                             rs2.value = -rs2.value;
-                        } else {
-                            op = op + "i";
+
+
+//                            System.out.println("dbg: sub");
+//                            System.out.println(inst.intoString());
                         }
+                        op = op + "i";
                     } else {
                         rs1 = getReg(((Binary) inst).lhs);
                         rs2 = new Register("tmp", false);
                         blockNow.addInst(new isaLi((Register) rs2, new imm(((constInt) ((Binary) inst).rhs).value)));
                     }
                 } else if (((Binary) inst).lhs instanceof constInt) {
-                    if (!(op.equals("sub") || op.equals("sll") || op.equals("sra"))) {
-                        if (canInImm(((constInt)((Binary)inst).lhs).value)) {
+                    if (!(op.equals("sub") || op.equals("sll") || op.equals("sra"))) { // 可换位
+                        if (canInImm(((constInt) ((Binary) inst).lhs).value)) {
                             rs1 = getReg(((Binary) inst).rhs);
                             rs2 = new imm(((constInt) ((Binary) inst).lhs).value);
                             op = op + "i";
@@ -184,13 +189,29 @@ public class ASMBuilder {
                 else if (temp.op.equals("ne"))
                     op = "bne";
                 else
-                    throw new innerError("isaBranch");
+                    throw new innerError("runInst: isaBranch");
                 blockNow.addInst(new isaBranch(op, getReg(temp.lhs), getReg(temp.rhs), getBlock(((Branch) inst).trueBlock)));
                 blockNow.addInst(new isaJump(getBlock(((Branch) inst).falseBlock)));
             } else {
                 blockNow.addInst(new isaBranch("bne", getReg(((Branch) inst).condition), asm.getPhyReg(0), getBlock(((Branch) inst).trueBlock)));
                 blockNow.addInst(new isaJump(getBlock(((Branch) inst).falseBlock)));
             }
+        } else if (inst instanceof Call) {
+            if (((Call) inst).params.size() <= 8) { // 8个reg够用
+                for (int i = 0; i < ((Call) inst).params.size(); i++) {
+                    blockNow.addInst(new isaMv(asm.getPhyReg(10 + i), getReg(((Call) inst).params.get(i))));
+                }
+            } else {
+                for (int i = 0; i < 8; i++) {
+                    blockNow.addInst(new isaMv(asm.getPhyReg(10 + i), getReg(((Call) inst).params.get(i))));
+                }
+                for (int i=8;i<((Call) inst).params.size();i++){
+                    blockNow.addInst(new isaStore(asm.getPhyReg("sp"),getReg(((Call) inst).params.get(i)),new imm((i-((Call) inst).params.size())*4),4));
+                }
+            }
+            blockNow.addInst(new isaCall(getFunction(((Call) inst).function),asm));
+            if(inst.register!= null) // has return value
+                blockNow.addInst(new isaMv(getReg(inst.register),asm.getPhyReg(10)));
         } else if (inst instanceof GetElementPtr) {
             if (((GetElementPtr) inst).base instanceof Null) // 空对象
                 return;
@@ -223,6 +244,7 @@ public class ASMBuilder {
         } else if (inst instanceof Icmp) {
             String op = ((Icmp) inst).op;
 
+//            System.out.println("Icmp in");
 //            System.out.println(((Icmp) inst).lhs.intoString());
 //            System.out.println(((Icmp) inst).rhs.intoString());
 
@@ -246,32 +268,27 @@ public class ASMBuilder {
             } else if (op.equals("ne")) {
                 Register tempReg = new Register("tmp", false);
                 blockNow.addInst(new isaCalc("xor", tempReg, getReg(((Icmp) inst).lhs), getReg(((Icmp) inst).rhs)));
-                blockNow.addInst(new isaCalc("sltiu", getReg(inst.register), asm.getPhyReg(0), tempReg));
+                blockNow.addInst(new isaCalc("sltiu", getReg(inst.register), asm.getPhyReg(0), tempReg)); // 直接和 x0 比较即可
             }
         } else if (inst instanceof Jump) {
             blockNow.addInst(new isaJump(getBlock(((Jump) inst).destination)));
-        } else if (inst instanceof Load) {
-            if (((Load) inst).address instanceof register && ((register) ((Load) inst).address).isGlobal) {
-                Register tempReg = new Register("tmp", false);
-                blockNow.addInst(new isaLui(tempReg, new addr(1, ((register) ((Load) inst).address).name)));
-                blockNow.addInst(new isaLoad(getReg(inst.register), tempReg, new addr(0, ((register) ((Load) inst).address).name), 4)); // 一次 load 4 Byte
-            } else {
-                blockNow.addInst(new isaLoad(getReg(inst.register), getReg(((Load) inst).address), new imm(0), 4));
-            }
         } else if (inst instanceof Phi) {
-            throw new innerError("ASM build run inst error: Phi");
+
+//            System.out.println(inst.intoString());
+
+            throw new innerError("runInst: Phi"); // 理论上所有phi都已经被消掉了啊
         } else if (inst instanceof Return) {
             if (((Return) inst).value != null)
                 assign(asm.getPhyReg(10), ((Return) inst).value);
             int count = 0;
-            for (Register reg : asm.getRegSaveReg()) {
+            for (Register reg : asm.getPSaveReg()) {
                 blockNow.addInst(new isaMv(reg, functionNow.calleeList.get(count)));
                 count++;
             }
 
 //            System.out.println(count);
 
-            blockNow.addInst(new isaMv(asm.getPhyReg(1), functionNow.raReg)); // 返回 ra 保存的地址处
+            blockNow.addInst(new isaMv(asm.getPhyReg(1), functionNow.raReg)); // 放入 return address
             blockNow.addInst(new isaRet(asm));
             functionNow.endBlock = blockNow;
         } else if (inst instanceof Store) {
@@ -282,17 +299,25 @@ public class ASMBuilder {
             } else {
                 blockNow.addInst(new isaStore(getReg(((Store) inst).value), getReg(((Store) inst).address), new imm(0), 4));
             }
+        } else if (inst instanceof Load) {
+            if (((Load) inst).address instanceof register && ((register) ((Load) inst).address).isGlobal) {
+                Register tempReg = new Register("tmp", false);
+                blockNow.addInst(new isaLui(tempReg, new addr(1, ((register) ((Load) inst).address).name)));
+                blockNow.addInst(new isaLoad(getReg(inst.register), tempReg, new addr(0, ((register) ((Load) inst).address).name), 4)); // 一次 load 4 Byte
+            } else {
+                blockNow.addInst(new isaLoad(getReg(inst.register), getReg(((Load) inst).address), new imm(0), 4));
+            }
         } else {
-            throw new innerError("ASM build run inst error");
+            throw new innerError("runInst: error IR inst type in.");
         }
     }
 
     public void instCut() {
-        boolean condition = true;
-        while (condition) {
-            int num=0;
+        boolean updated = true;
+        while (updated) {
+            int num = 0;
 
-            condition = false;
+            updated = false;
             HashSet<Register> visited = new HashSet<>();
             visited.add(asm.getPhyReg(10));
             for (ASMBlock b : functionNow.sonBlocks) {
@@ -303,13 +328,13 @@ public class ASMBuilder {
             for (ASMBlock block : functionNow.sonBlocks) {
                 for (int i = 0; i < block.insts.size(); i++) {
                     isaInst inst = block.insts.get(i);
-                    if ((inst instanceof isaLi && !visited.contains(((isaLi) inst).register)) ||
-                            (inst instanceof isaLui && !visited.contains(((isaLui) inst).register)) ||
+                    if ((inst instanceof isaLi && !visited.contains(((isaLi) inst).rd)) ||
+                            (inst instanceof isaLui && !visited.contains(((isaLui) inst).rd)) ||
                             (inst instanceof isaLoad && !visited.contains(((isaLoad) inst).register)) ||
                             (inst instanceof isaCalc && !visited.contains(((isaCalc) inst).rd))) {
                         block.popInst(inst);
                         i--;
-                        condition = true;
+                        updated = true;
                     }
                 }
             }
@@ -350,7 +375,7 @@ public class ASMBuilder {
         for (register reg : function.params) {
             functionNow.paramList.add(getReg(reg));
         }
-        for (Register reg : asm.getRegSaveReg()) {
+        for (Register reg : asm.getPSaveReg()) {
             Register tempReg = new Register("tmp", false);
             functionNow.calleeList.add(tempReg);
             blockNow.addInst(new isaMv(tempReg, reg));

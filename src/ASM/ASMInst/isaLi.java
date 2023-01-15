@@ -6,17 +6,17 @@ import java.util.HashSet;
 import java.util.Collections;
 
 public class isaLi extends isaInst {
-    public Register register;
+    public Register rd;
     public imm imm;
 
     public isaLi(Register reg_in, imm imm_in) {
-        register = reg_in;
+        rd = reg_in;
         imm = imm_in;
     }
 
     @Override
     public HashSet<Register> getDefinition() {
-        return new HashSet<>(Collections.singletonList(register));
+        return new HashSet<>(Collections.singletonList(rd));
     }
 
     @Override
@@ -26,8 +26,8 @@ public class isaLi extends isaInst {
 
     @Override
     public void replaceDef(Register old_reg, Register new_reg) {
-        if (register == old_reg)
-            register = new_reg;
+        if (rd == old_reg)
+            rd = new_reg;
     }
 
     @Override
@@ -37,6 +37,6 @@ public class isaLi extends isaInst {
 
     @Override
     public String intoString() {
-        return "Li "+register.intoString()+", "+imm.intoString();
+        return "Li "+rd.intoString()+", "+imm.intoString();
     }
 }

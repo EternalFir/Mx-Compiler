@@ -6,38 +6,38 @@ import java.util.HashSet;
 import java.util.Collections;
 
 public class isaMv extends isaInst {
-    public Register register;
-    public Register src;
+    public Register rd;
+    public Register rs;
 
-    public isaMv(Register reg_in, Register src_in) {
-        register = reg_in;
-        src = src_in;
+    public isaMv(Register rd_in, Register rs_in) {
+        rd = rd_in;
+        rs = rs_in;
     }
 
     @Override
     public HashSet<Register> getDefinition() {
-        return new HashSet<>(Collections.singletonList(register));
+        return new HashSet<>(Collections.singletonList(rd));
     }
 
     @Override
     public HashSet<Register> getUsage() {
-        return new HashSet<>(Collections.singletonList(src));
+        return new HashSet<>(Collections.singletonList(rs));
     }
 
     @Override
     public void replaceDef(Register old_reg, Register new_reg) {
-        if (register == old_reg)
-            register = new_reg;
+        if (rd == old_reg)
+            rd = new_reg;
     }
 
     @Override
     public void replaceUsage(Register old_reg, Register new_reg) {
-        if (src == old_reg)
-            src = new_reg;
+        if (rs == old_reg)
+            rs = new_reg;
     }
 
     @Override
     public String intoString() {
-        return "mv "+register.intoString()+", "+src.intoString();
+        return "mv "+rd.intoString()+", "+rs.intoString();
     }
 }

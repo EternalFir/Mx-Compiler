@@ -5,6 +5,7 @@ public class Register extends data{
 
     public boolean isPhy = true; // for physical register
 
+    public Register objectReg=null; // only for virtual register;
 
 //    public register(String name_in) {
 //        name = name_in;
@@ -17,6 +18,9 @@ public class Register extends data{
     }
 
     public String intoString() {
-        return name;
+        if(isPhy)
+            return name;
+        else
+            return objectReg.intoString();
     }
 }

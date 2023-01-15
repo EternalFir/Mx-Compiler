@@ -53,7 +53,7 @@ public class RegAllocator {
                     allocaVReg(asm.getPhyReg("t0"), regNow);
                 }
             } else if(inst instanceof isaLi){
-                regNow=((isaLi)inst).register;
+                regNow=((isaLi)inst).rd;
                 if(regNow != null && !regNow.isPhy){
                     allocaVReg(asm.getPhyReg("t0"),regNow);
                 }
@@ -67,16 +67,16 @@ public class RegAllocator {
                     allocaVReg(asm.getPhyReg("t0"),regNow);
                 }
             }else if(inst instanceof  isaLui){
-                regNow=((isaLui)inst).register;
+                regNow=((isaLui)inst).rd;
                 if(regNow != null && !regNow.isPhy){
                     allocaVReg(asm.getPhyReg("t0"),regNow);
                 }
             }else if(inst instanceof  isaMv){
-                regNow=((isaMv)inst).src;
+                regNow=((isaMv)inst).rs;
                 if(regNow != null && !regNow.isPhy){
                     allocaVReg(asm.getPhyReg("t1"),regNow);
                 }
-                regNow=((isaMv)inst).register;
+                regNow=((isaMv)inst).rd;
                 if(regNow != null && !regNow.isPhy){
                     allocaVReg(asm.getPhyReg("t0"),regNow);
                 }

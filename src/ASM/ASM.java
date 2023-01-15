@@ -43,7 +43,7 @@ public class ASM {
         return out;
     }
 
-    public ArrayList<Register> getRegSaveReg() {
+    public ArrayList<Register> getPSaveReg() {
         ArrayList<Register> out = new ArrayList<>();
         out.add(getPhyReg(8));
         out.add(getPhyReg(9));

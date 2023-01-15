@@ -47,11 +47,11 @@ public class ASMPrinter {
     }
 
     public void print(){
-        printer.println("\t.text");
+        printer.println("\t.text"); // code part
         asm.functions.forEach((name,func)->printFunc(func));
         printer.println("\t.section\t.bss");
         asm.globalVariables.forEach((name,var)->printGlobalVariable(var));
-        printer.println("\t.section\t.rodata");
+        printer.println("\t.section\t.constString");
         asm.constStr.forEach((name,str)->printConstString(str));
     }
 }
