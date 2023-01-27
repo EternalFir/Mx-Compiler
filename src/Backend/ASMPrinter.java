@@ -37,13 +37,13 @@ public class ASMPrinter {
     }
 
     public void printFunc(ASMFunction func) {
-        printer.println("\t.globl\t" + func.toString());
-        printer.println("\t.type\t" + func.toString() + ", @function");
+        printer.println("\t.globl\t" + func.intoString());
+        printer.println("\t.type\t" + func.intoString() + ", @function");
         printer.println(func.name + ":");
         for (ASMBlock block : func.sonBlocks){
             printBlock(block);
         }
-        printer.println("\t.size\t" + func.toString() + ", .-" + func.toString());
+        printer.println("\t.size\t" + func.intoString() + ", .-" + func.intoString());
     }
 
     public void print(){
@@ -51,7 +51,7 @@ public class ASMPrinter {
         asm.functions.forEach((name,func)->printFunc(func));
         printer.println("\t.section\t.bss");
         asm.globalVariables.forEach((name,var)->printGlobalVariable(var));
-        printer.println("\t.section\t.constString");
+        printer.println("\t.section\t.rodata");
         asm.constStr.forEach((name,str)->printConstString(str));
     }
 }

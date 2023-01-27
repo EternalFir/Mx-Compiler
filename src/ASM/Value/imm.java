@@ -14,6 +14,6 @@ public class imm extends data {
     }
 
     public String intoString() {
-        return new StringBuilder(value).toString();
+        return ""+value;
     }
 }

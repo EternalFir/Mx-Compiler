@@ -55,7 +55,7 @@ public class ASM {
 
     public ArrayList<Register> getTempFuncArgumentReg() {
         ArrayList<Register> out = new ArrayList<>();
-        out.add(getPhyReg(0));
+        out.add(getPhyReg(1));
         for (int i = 5; i <= 7; i++) {
             out.add(getPhyReg(i));
         }
@@ -68,5 +68,12 @@ public class ASM {
         return out;
     }
 
-
+    public ArrayList<Register> getUsablePReg() {
+        ArrayList<Register> out = new ArrayList<>();
+        out.addAll(getTempFuncArgumentReg());
+        out.addAll(getPSaveReg());
+        out.remove(0);
+        out.add(getPhyReg(1));
+        return out;
+    }
 }

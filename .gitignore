@@ -6,6 +6,10 @@ gen
 
 input.mx
 input.cpp
+output
+output.s
+builtin.s
+
  
 # Compiled class file
 *.class

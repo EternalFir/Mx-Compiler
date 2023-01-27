@@ -26,7 +26,7 @@ public class symbolCollector implements ASTVisitor {
         printFunc.returnType = new primitiveType("void");
         printFunc.paramList.add(new varSymbol("string", new primitiveType("string")));
         globalScope.funcMap.put("print", printFunc);
-        printFunc.function = new Function("__bulitIn__print");
+        printFunc.function = new Function("__builtIn__print");
         printFunc.function.returnType = ir.getType(printFunc.returnType);
 
         funcSymbol printlnFunc = new funcSymbol("println");
@@ -53,7 +53,7 @@ public class symbolCollector implements ASTVisitor {
         funcSymbol getInt = new funcSymbol("getInt");
         getInt.returnType = new primitiveType("int");
         globalScope.funcMap.put("getInt", getInt);
-        getInt.function = new Function("__bulitIn__getInt");
+        getInt.function = new Function("__builtIn__getInt");
         getInt.function.returnType = ir.getType(getInt.returnType);
 
         funcSymbol getString = new funcSymbol("getString");

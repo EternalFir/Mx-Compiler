@@ -14,7 +14,7 @@ public class Block {
     public ArrayList<instruction> inst = new ArrayList<>();
     public ArrayList<Block> prevBlocks = new ArrayList<>();
     public ArrayList<Block> nextBlocks = new ArrayList<>();
-    public LinkedHashMap<register, operand> regValues = new LinkedHashMap<>();
+    public HashMap<register, operand> regValues = new HashMap<>();
     public Phi branchFrom = null;
     public int loopDepth = 0;
     public boolean is_end = false;
@@ -44,7 +44,7 @@ public class Block {
         inst.add(0, new_inst);
     }
 
-    public void addBaskInst(instruction new_inst) {
+    public void addBackInst(instruction new_inst) {
         inst.add(inst.size() - 1, new_inst);
     }
 

@@ -37,6 +37,6 @@ public class isaLi extends isaInst {
 
     @Override
     public String intoString() {
-        return "Li "+rd.intoString()+", "+imm.intoString();
+        return "li "+rd.intoString()+", "+imm.intoString();
     }
 }

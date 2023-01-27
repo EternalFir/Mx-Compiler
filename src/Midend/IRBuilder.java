@@ -104,10 +104,15 @@ public class IRBuilder implements ASTVisitor {
             Return tempReturn;
             if (currentFunction.name.equals("main"))
                 tempReturn = new Return(currentBlock, new constInt(0, 32));
-            else if (currentFunction.returnType.equals(new voidIRType()))
+            else if (currentFunction.returnType.sameType(new voidIRType()))
                 tempReturn = new Return(currentBlock, new constVoid());
-            else if (currentFunction.returnInsts.isEmpty())
+            else if (currentFunction.returnInsts.isEmpty()){
+
+//                System.out.println(currentFunction.name);
+//                System.out.println(currentFunction.returnType.intoString());
+
                 throw new innerError("no return sentence.");
+            }
             else
                 tempReturn = new Return(currentBlock, new constVoid());
             currentBlock.addEndInst(tempReturn);
@@ -116,7 +121,7 @@ public class IRBuilder implements ASTVisitor {
         if (currentFunction.returnInsts.size() > 1) { // multi-return cases
             currentBlock = new Block(loopDepth);
             Return tempReturn;
-            if (!currentFunction.returnType.equals(new voidIRType())) {
+            if (!currentFunction.returnType.sameType(new voidIRType())) {
                 register temp = new register(currentFunction.returnType, "tmp.");
                 Phi phi = new Phi(currentBlock, temp);
                 for (Return i : currentFunction.returnInsts) {
@@ -304,9 +309,9 @@ public class IRBuilder implements ASTVisitor {
     @Override
     public void visit(continueSentNode node) {
         if (node.loop instanceof forSentNode) {
-            currentBlock.addEndInst(new Jump(currentBlock, ((forSentNode) node.loop).destinationBlock));
+            currentBlock.addEndInst(new Jump(currentBlock, ((forSentNode) node.loop).moveBlock));
         } else if (node.loop instanceof whileSentNode) {
-            currentBlock.addEndInst(new Jump(currentBlock, ((whileSentNode) node.loop).destinationBlock));
+            currentBlock.addEndInst(new Jump(currentBlock, ((whileSentNode) node.loop).conditionBlock));
         }
     }
 
@@ -368,7 +373,7 @@ public class IRBuilder implements ASTVisitor {
                 break;
             case "+":
                 op = "add";
-                opName = "__builtin__str__add";
+                opName = "__builtIn__stringAdd";
                 if (node.lexp.type.isString()) {
                     node.lexp.accept(this);
                     node.rexp.accept(this);
@@ -419,7 +424,7 @@ public class IRBuilder implements ASTVisitor {
                 break;
             case "<":
                 op = "slt";
-                opName = "__builtin__str__lt";
+                opName = "__builtIn__stringLt";
                 if (node.lexp.type.isString()) {
                     node.lexp.accept(this);
                     node.rexp.accept(this);
@@ -444,7 +449,7 @@ public class IRBuilder implements ASTVisitor {
                 break;
             case ">":
                 op = "sgt";
-                opName = "__builtin__str__gt";
+                opName = "__builtIn__strGt";
                 if (node.lexp.type.isString()) {
                     node.lexp.accept(this);
                     node.rexp.accept(this);
@@ -469,7 +474,7 @@ public class IRBuilder implements ASTVisitor {
                 break;
             case "<=":
                 op = "sle";
-                opName = "__builtin__str__le";
+                opName = "__builtIn__stringLe";
                 if (node.lexp.type.isString()) {
                     node.lexp.accept(this);
                     node.rexp.accept(this);
@@ -494,7 +499,7 @@ public class IRBuilder implements ASTVisitor {
                 break;
             case ">=":
                 op = "sge";
-                opName = "__builtin__str__ge";
+                opName = "__builtIn__stringGe";
                 if (node.lexp.type.isString()) {
                     node.lexp.accept(this);
                     node.rexp.accept(this);
@@ -519,7 +524,7 @@ public class IRBuilder implements ASTVisitor {
                 break;
             case "==":
                 op = "eq";
-                opName = "__builtin__str__eq";
+                opName = "__builtIn__stringEq";
                 if (node.lexp.type.isString()) {
                     node.lexp.accept(this);
                     node.rexp.accept(this);
@@ -548,7 +553,7 @@ public class IRBuilder implements ASTVisitor {
                 break;
             case "!=":
                 op = "ne";
-                opName = "__builtin__str__ne";
+                opName = "__builtIn__stringNe";
                 if (node.lexp.type.isString()) {
                     node.lexp.accept(this);
                     node.rexp.accept(this);
@@ -705,11 +710,9 @@ public class IRBuilder implements ASTVisitor {
             currentBlock.addInst(new BitCast(currentBlock, node.operand, mallocReg));
 
 
-
 //            for (instruction i: currentBlock.inst){
 //                System.out.println(i.intoString());
 //            }
-
 
 
             if (classType.constructor != null) {
@@ -740,11 +743,12 @@ public class IRBuilder implements ASTVisitor {
         node.exp.accept(this);
         operand expression = getReg(node.exp.operand);
         node.operand = new register(expression.irType, "tmp.");
-        if (Objects.equals(node.op, "++")) {
+        if (node.op.equals("++")) {
             currentBlock.addInst(new Binary(currentBlock, (register) node.operand, expression, new constInt(1, 32), "add"));
             assignment(node.exp.operand, node.operand);
-        } else if (Objects.equals(node.op, "--")) {
+        } else if (node.op.equals("--")) {
             currentBlock.addInst(new Binary(currentBlock, (register) node.operand, expression, new constInt(1, 32), "sub"));
+            assignment(node.exp.operand,node.operand);
         }
         choseBranch(node);
     }
@@ -1115,7 +1119,12 @@ public class IRBuilder implements ASTVisitor {
 
     public void setPhi(Function function) {
         int blockIDNow = 0;
-        for (Block block : function.blocks) {
+
+//        int dbg_cnt = 0;
+
+//        for (Block block : function.blocks) {
+        for (int block_num = 0; block_num < function.blocks.size(); block_num++) { // 中途会改变 ArrayList 内部内容不能使用 : 来遍历
+            Block block = function.blocks.get(block_num);
             boolean containPhi = false;
             for (instruction i : block.inst) {
                 if (i instanceof Phi) {
@@ -1153,6 +1162,8 @@ public class IRBuilder implements ASTVisitor {
                     }
                 }
             }
+
+//            dbg_cnt++;
         }
         for (Block block : function.blocks) {
             while (!block.regValues.isEmpty()) {
@@ -1163,7 +1174,7 @@ public class IRBuilder implements ASTVisitor {
                     while (iter.hasNext()) {
                         Map.Entry<register, operand> nxt = iter.next();
                         if (!(nxt.getValue() instanceof register) || !block.regValues.containsKey(nxt.getValue())) {
-                            block.addBaskInst(new Assign(block, nxt.getKey(), nxt.getValue()));
+                            block.addBackInst(new Assign(block, nxt.getKey(), nxt.getValue()));
                             iter.remove();
                             cut = true;
                         }
@@ -1173,7 +1184,7 @@ public class IRBuilder implements ASTVisitor {
                 if (iter.hasNext()) {
                     Map.Entry<register, operand> nxt = iter.next();
                     register insert = new register(nxt.getKey().irType, "tmp");
-                    block.addBaskInst(new Assign(block, insert, nxt.getValue()));
+                    block.addBackInst(new Assign(block, insert, nxt.getValue()));
                     block.regValues.forEach((key, value) -> {
                         if (value == nxt.getValue())
                             block.regValues.replace(key, insert);

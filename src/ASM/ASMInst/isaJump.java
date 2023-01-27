@@ -31,6 +31,6 @@ public class isaJump extends isaInst{
 
     @Override
     public String intoString() {
-        return "jump "+ destination.intoString();
+        return "j "+ destination.intoString();
     }
 }

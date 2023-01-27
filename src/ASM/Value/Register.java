@@ -1,11 +1,14 @@
 package ASM.Value;
 
-public class Register extends data{
+public class Register extends data {
     public String name;
 
     public boolean isPhy = true; // for physical register
 
-    public Register objectReg=null; // only for virtual register;
+    public Register objectReg =null; // objected phy register
+    public Integer degree = 0;
+    public Double weight = 0.0;
+    public Integer offset = 0; // for spilled VReg only
 
 //    public register(String name_in) {
 //        name = name_in;
@@ -18,7 +21,7 @@ public class Register extends data{
     }
 
     public String intoString() {
-        if(isPhy)
+        if (isPhy)
             return name;
         else
             return objectReg.intoString();

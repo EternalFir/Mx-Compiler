@@ -205,13 +205,13 @@ public class ASMBuilder {
                 for (int i = 0; i < 8; i++) {
                     blockNow.addInst(new isaMv(asm.getPhyReg(10 + i), getReg(((Call) inst).params.get(i))));
                 }
-                for (int i=8;i<((Call) inst).params.size();i++){
-                    blockNow.addInst(new isaStore(asm.getPhyReg("sp"),getReg(((Call) inst).params.get(i)),new imm((i-((Call) inst).params.size())*4),4));
+                for (int i = 8; i < ((Call) inst).params.size(); i++) { //spilled
+                    blockNow.addInst(new isaStore(asm.getPhyReg("sp"), getReg(((Call) inst).params.get(i)), new imm((i - ((Call) inst).params.size()) * 4), 4));
                 }
             }
-            blockNow.addInst(new isaCall(getFunction(((Call) inst).function),asm));
-            if(inst.register!= null) // has return value
-                blockNow.addInst(new isaMv(getReg(inst.register),asm.getPhyReg(10)));
+            blockNow.addInst(new isaCall(getFunction(((Call) inst).function), asm));
+            if (inst.register != null) // has return value
+                blockNow.addInst(new isaMv(getReg(inst.register), asm.getPhyReg(10)));
         } else if (inst instanceof GetElementPtr) {
             if (((GetElementPtr) inst).base instanceof Null) // 空对象
                 return;
@@ -268,7 +268,7 @@ public class ASMBuilder {
             } else if (op.equals("ne")) {
                 Register tempReg = new Register("tmp", false);
                 blockNow.addInst(new isaCalc("xor", tempReg, getReg(((Icmp) inst).lhs), getReg(((Icmp) inst).rhs)));
-                blockNow.addInst(new isaCalc("sltiu", getReg(inst.register), asm.getPhyReg(0), tempReg)); // 直接和 x0 比较即可
+                blockNow.addInst(new isaCalc("sltu", getReg(inst.register), asm.getPhyReg(0), tempReg)); // 直接和 x0 比较即可
             }
         } else if (inst instanceof Jump) {
             blockNow.addInst(new isaJump(getBlock(((Jump) inst).destination)));
@@ -295,9 +295,9 @@ public class ASMBuilder {
             if (((Store) inst).address instanceof register && ((register) ((Store) inst).address).isGlobal) {
                 Register tempReg = new Register("tmp", false);
                 blockNow.addInst(new isaLui(tempReg, new addr(1, ((register) ((Store) inst).address).name)));
-                blockNow.addInst(new isaStore(getReg(((Store) inst).value), tempReg, new addr(0, ((register) ((Store) inst).address).name), 4));
+                blockNow.addInst(new isaStore(tempReg, getReg(((Store) inst).value), new addr(0, ((register) ((Store) inst).address).name), 4));
             } else {
-                blockNow.addInst(new isaStore(getReg(((Store) inst).value), getReg(((Store) inst).address), new imm(0), 4));
+                blockNow.addInst(new isaStore(getReg(((Store) inst).address), getReg(((Store) inst).value), new imm(0), 4));
             }
         } else if (inst instanceof Load) {
             if (((Load) inst).address instanceof register && ((register) ((Load) inst).address).isGlobal) {
@@ -315,7 +315,7 @@ public class ASMBuilder {
     public void instCut() {
         boolean updated = true;
         while (updated) {
-            int num = 0;
+//            int num = 0;
 
             updated = false;
             HashSet<Register> visited = new HashSet<>();
@@ -339,13 +339,16 @@ public class ASMBuilder {
                 }
             }
 
-//            System.out.println(num);
+
+//            num++;
         }
+//            System.out.println(num);
+
     }
 
     public void runBlock(Block block) {
         blockNow = getBlock(block);
-        block.name = "." + functionNow.name + "." + block.name;
+        blockNow.name = "." + functionNow.name + "." + block.name;
         for (Block b : block.prevBlocks) {
             blockNow.blockBefore.add(getBlock(b));
         }
@@ -390,7 +393,7 @@ public class ASMBuilder {
             for (int i = 0; i < 8; i++) {
                 blockNow.addInst(new isaMv(functionNow.paramList.get(i), asm.getPhyReg(10 + i)));
             }
-            for (int i = 8; i < functionNow.paramList.size(); i++) {
+            for (int i = 8; i < functionNow.paramList.size(); i++) { // spilled
                 blockNow.addInst(new isaLoad(functionNow.paramList.get(i), asm.getPhyReg(2), new imm((i - 8) * 4, true), 4));
             }
         } else {

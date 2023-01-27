@@ -29,7 +29,7 @@ public class IRPrinter {
     public void printBlock(Block block_in) {
         printer.println(block_in.name + ":");
         for (instruction inst : block_in.inst) {
-            printer.println(" " + inst.intoString());
+            printer.println("  " + inst.intoString());
         }
     }
 

@@ -20,12 +20,12 @@ public class isaLoad extends isaInst{
 
     @Override
     public HashSet<Register> getDefinition() {
-        return new HashSet<>(Collections.singletonList(address));
+        return new HashSet<>(Collections.singletonList(register));
     }
 
     @Override
     public HashSet<Register> getUsage() {
-        return new HashSet<>(Collections.singletonList(register));
+        return new HashSet<>(Collections.singletonList(address));
     }
 
     @Override
