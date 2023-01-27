@@ -49,9 +49,7 @@ public class RegAllocator {
     public HashSet<Register> coloredReg;
     public HashSet<Register> needKeepReg; // regs can't be moved to memory
     public Stack<Register> toColorReg;
-
-
-    // 应该放在较后面
+    
     public HashMap<ASMBlock, HashSet<Register>> activeInBlocks = null; // for regs which is active across program points
     public HashMap<ASMBlock, HashSet<Register>> activeAfterBlocks = null;
 
