@@ -217,7 +217,7 @@ public class RegAllocator {
         for (ASMBlock block : funcNow.sonBlocks) {
             HashSet<Register> activeNow = new HashSet<>();
             activeNow.addAll(activeAfterBlocks.get(block));
-            for (int i = block.insts.size() - 1; i >= 0; i--) { //块内逆向
+            for (int i = block.insts.size() - 1; i >= 0; i--) { // reverse in block
                 isaInst inst = block.insts.get(i);
                 if (inst instanceof isaMv) {
                     reachedMv.add((isaMv) inst);
@@ -567,7 +567,7 @@ public class RegAllocator {
                 funcNow.beginBlock.addInst(new isaCalc("addi", asm.getPhyReg("sp"), asm.getPhyReg("sp"), new imm(-spValue)), 0);
                 funcNow.endBlock.addLastInst(new isaCalc("addi", asm.getPhyReg("sp"), asm.getPhyReg("sp"), new imm(spValue)));
             }
-            for (isaInst inst : funcNow.beginBlock.insts) { // load inst 的 imm 也要做出相应更改
+            for (isaInst inst : funcNow.beginBlock.insts) { // imm of isaLoad inst needs to be changed as well
                 if (inst instanceof isaLoad && ((isaLoad) inst).offset.isParamImm) {
                     ((isaLoad) inst).offset.value += calleePC;
                 }

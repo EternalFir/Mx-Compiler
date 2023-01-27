@@ -128,7 +128,7 @@ public class ASMBuilder {
                 rs2 = getReg(((Binary) inst).rhs);
             } else {
                 if (((Binary) inst).rhs instanceof constInt) {
-                    if (canInImm(((constInt) ((Binary) inst).rhs).value)) { // 能直接放进imm
+                    if (canInImm(((constInt) ((Binary) inst).rhs).value)) { // can be put into imm directly
                         rs1 = getReg(((Binary) inst).lhs);
                         rs2 = new imm(((constInt) ((Binary) inst).rhs).value);
                         if (op.equals("sub")) {
@@ -146,7 +146,7 @@ public class ASMBuilder {
                         blockNow.addInst(new isaLi((Register) rs2, new imm(((constInt) ((Binary) inst).rhs).value)));
                     }
                 } else if (((Binary) inst).lhs instanceof constInt) {
-                    if (!(op.equals("sub") || op.equals("sll") || op.equals("sra"))) { // 可换位
+                    if (!(op.equals("sub") || op.equals("sll") || op.equals("sra"))) { // can be exchanged
                         if (canInImm(((constInt) ((Binary) inst).lhs).value)) {
                             rs1 = getReg(((Binary) inst).rhs);
                             rs2 = new imm(((constInt) ((Binary) inst).lhs).value);
@@ -197,7 +197,7 @@ public class ASMBuilder {
                 blockNow.addInst(new isaJump(getBlock(((Branch) inst).falseBlock)));
             }
         } else if (inst instanceof Call) {
-            if (((Call) inst).params.size() <= 8) { // 8个reg够用
+            if (((Call) inst).params.size() <= 8) { // 8 reg enough
                 for (int i = 0; i < ((Call) inst).params.size(); i++) {
                     blockNow.addInst(new isaMv(asm.getPhyReg(10 + i), getReg(((Call) inst).params.get(i))));
                 }
@@ -213,7 +213,7 @@ public class ASMBuilder {
             if (inst.register != null) // has return value
                 blockNow.addInst(new isaMv(getReg(inst.register), asm.getPhyReg(10)));
         } else if (inst instanceof GetElementPtr) {
-            if (((GetElementPtr) inst).base instanceof Null) // 空对象
+            if (((GetElementPtr) inst).base instanceof Null) // null object
                 return;
             Register base = getReg(((GetElementPtr) inst).base);
             basicIRType type = ((pointerIRType) ((GetElementPtr) inst).base.irType).ptrType;
@@ -221,14 +221,14 @@ public class ASMBuilder {
             if (((GetElementPtr) inst).offset != null) {
                 offset = ((classIRType) type).getOffset(((GetElementPtr) inst).offset.value) / 8; // bite into Byte
             }
-            if (((GetElementPtr) inst).index instanceof constInt) { // 常数下标
+            if (((GetElementPtr) inst).index instanceof constInt) { // const index
                 int imm = ((constInt) ((GetElementPtr) inst).index).value * type.size() / 8 + offset;
                 blockNow.addInst(new isaCalc("addi", getReg(inst.register), base, new imm(imm)));
-            } else { // 变量下标等
+            } else { // vars index
                 Register temp = new Register("tmp", false);
                 int size = type.size() / 8;
                 int length = 31 - Integer.numberOfLeadingZeros(size);
-                if (1 << (length) == size) { // 刚好对齐
+                if (1 << (length) == size) { // align
                     blockNow.addInst(new isaCalc("slli", temp, getReg(((GetElementPtr) inst).index), new imm(length)));
                 } else {
                     blockNow.addInst(new isaCalc("mul", temp, getReg(((GetElementPtr) inst).index), getReg(new constInt(size, 32))));
@@ -268,7 +268,7 @@ public class ASMBuilder {
             } else if (op.equals("ne")) {
                 Register tempReg = new Register("tmp", false);
                 blockNow.addInst(new isaCalc("xor", tempReg, getReg(((Icmp) inst).lhs), getReg(((Icmp) inst).rhs)));
-                blockNow.addInst(new isaCalc("sltu", getReg(inst.register), asm.getPhyReg(0), tempReg)); // 直接和 x0 比较即可
+                blockNow.addInst(new isaCalc("sltu", getReg(inst.register), asm.getPhyReg(0), tempReg)); // compare with x0 straightly
             }
         } else if (inst instanceof Jump) {
             blockNow.addInst(new isaJump(getBlock(((Jump) inst).destination)));
@@ -276,7 +276,7 @@ public class ASMBuilder {
 
 //            System.out.println(inst.intoString());
 
-            throw new innerError("runInst: Phi"); // 理论上所有phi都已经被消掉了啊
+            throw new innerError("runInst: Phi"); // all Phi should be removed in theorem
         } else if (inst instanceof Return) {
             if (((Return) inst).value != null)
                 assign(asm.getPhyReg(10), ((Return) inst).value);
@@ -288,7 +288,7 @@ public class ASMBuilder {
 
 //            System.out.println(count);
 
-            blockNow.addInst(new isaMv(asm.getPhyReg(1), functionNow.raReg)); // 放入 return address
+            blockNow.addInst(new isaMv(asm.getPhyReg(1), functionNow.raReg)); // put into return address
             blockNow.addInst(new isaRet(asm));
             functionNow.endBlock = blockNow;
         } else if (inst instanceof Store) {
@@ -303,7 +303,7 @@ public class ASMBuilder {
             if (((Load) inst).address instanceof register && ((register) ((Load) inst).address).isGlobal) {
                 Register tempReg = new Register("tmp", false);
                 blockNow.addInst(new isaLui(tempReg, new addr(1, ((register) ((Load) inst).address).name)));
-                blockNow.addInst(new isaLoad(getReg(inst.register), tempReg, new addr(0, ((register) ((Load) inst).address).name), 4)); // 一次 load 4 Byte
+                blockNow.addInst(new isaLoad(getReg(inst.register), tempReg, new addr(0, ((register) ((Load) inst).address).name), 4)); // load 4 Byte at once
             } else {
                 blockNow.addInst(new isaLoad(getReg(inst.register), getReg(((Load) inst).address), new imm(0), 4));
             }
@@ -386,7 +386,7 @@ public class ASMBuilder {
         Register raReg = new Register("tmp", false);
         functionNow.raReg = raReg;
         blockNow.addInst(new isaMv(raReg, asm.getPhyReg("ra")));
-        if (functionNow.paramList.size() > 8) { // 参数过多，reg 不够用
+        if (functionNow.paramList.size() > 8) { // too many params
 
 //            System.out.println("params too many");
 

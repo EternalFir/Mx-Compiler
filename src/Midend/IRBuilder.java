@@ -1123,7 +1123,7 @@ public class IRBuilder implements ASTVisitor {
 //        int dbg_cnt = 0;
 
 //        for (Block block : function.blocks) {
-        for (int block_num = 0; block_num < function.blocks.size(); block_num++) { // 中途会改变 ArrayList 内部内容不能使用 : 来遍历
+        for (int block_num = 0; block_num < function.blocks.size(); block_num++) { // changed contains in ArrayList in midway, can use : to ergodic
             Block block = function.blocks.get(block_num);
             boolean containPhi = false;
             for (instruction i : block.inst) {

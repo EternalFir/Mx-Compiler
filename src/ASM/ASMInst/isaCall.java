@@ -21,7 +21,7 @@ public class isaCall extends isaInst{
     @Override
     public HashSet<Register> getUsage() {
         HashSet<Register> out= new HashSet<>();
-        if(function.paramList.size()>8){ //参数过多，reg不够用
+        if(function.paramList.size()>8){ //too many params, spilled
             for(int i=0;i<8;i++){
                 out.add(asm.getPhyReg(10+i));
             }
