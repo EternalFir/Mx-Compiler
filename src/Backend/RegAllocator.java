@@ -9,7 +9,8 @@ import java.util.*;
 
 public class RegAllocator {
 
-    public static class ASMEdge { // 应当是 s t a t i c 的，方便判断是否出现过 !!!
+    public static class ASMEdge {
+        // 应当是 s t a t i c 的，方便判断是否出现过 !!!
         Register u, v;
 
         public ASMEdge(Register start, Register end) {
