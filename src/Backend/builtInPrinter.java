@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 public class builtInPrinter {
+
+//    String builtIn="debug";
 String builtIn="""
         	.text
         	.align	2
