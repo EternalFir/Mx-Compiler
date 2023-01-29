@@ -110,7 +110,7 @@ public class semanticChecker implements ASTVisitor {
         node.funcList.forEach(func -> func.accept(this));
         if (node.constructor != null) {
             if (!node.constructor.name.equals(node.name))
-                throw new semanticError("mismatch constructor name", node.pos);
+                throw new semanticError("dismatch constructor name", node.pos);
             node.constructor.accept(this);
             node.classType.classIrType.constructor = node.constructor.funcSymbol.function;
         }
@@ -146,7 +146,7 @@ public class semanticChecker implements ASTVisitor {
             currentScope = scopeBefore;
         node.expList.forEach(x -> x.accept(this));
         if (node.paramList.size() != node.expList.size())
-            throw new semanticError("paramenter size not match", node.pos);
+            throw new semanticError("parameter size not match", node.pos);
         for (int i = 0; i < node.paramList.size(); i++) {
             if(node.paramList.get(i).type.dimension==0){
                 basicType temp=new primitiveType(node.paramList.get(i).type.basicTypeName);
@@ -199,6 +199,8 @@ public class semanticChecker implements ASTVisitor {
     public void visit(forSentNode node) {
         if (node.init != null)
             node.init.accept(this);
+        if(node.initDef != null)
+            node.initDef.accept(this);
         if (node.cond != null)
             node.cond.accept(this);
         if (node.cond != null && !node.cond.type.isBool())

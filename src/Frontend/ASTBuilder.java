@@ -68,8 +68,8 @@ public class ASTBuilder extends MxParserBaseVisitor<ASTNode> {
         node.name = ctx.Identifier().getText();
         if (ctx.expression() != null) {
             node.expression = (ExpressionNode) visit(ctx.expression());
-        }else{
-            node.expression=null;
+        } else {
+            node.expression = null;
         }
         return node;
     }
@@ -104,7 +104,7 @@ public class ASTBuilder extends MxParserBaseVisitor<ASTNode> {
 
     @Override
     public ASTNode visitLambdaDef(MxParser.LambdaDefContext ctx) {
-        lambdaDefNode node = new lambdaDefNode(new position(ctx), ctx.ifAnd!=null?Objects.equals(ctx.ifAnd.getText(), "&"):false,
+        lambdaDefNode node = new lambdaDefNode(new position(ctx), ctx.ifAnd != null ? Objects.equals(ctx.ifAnd.getText(), "&") : false,
                 ctx.codeBlock() != null ? (codeBlockNode) visit(ctx.codeBlock()) : null,
                 ctx.paramGroup() != null ? ((varDefNode) visit(ctx.paramGroup())).varDefList : new ArrayList<>(),
                 ctx.expressionGroup() != null ? (expressionGroupNode) visit(ctx.expressionGroup()) : new expressionGroupNode(new position(ctx)));
@@ -140,6 +140,10 @@ public class ASTBuilder extends MxParserBaseVisitor<ASTNode> {
             node.init = (ExpressionNode) visit(ctx.init);
         else
             node.init = null;
+        if (ctx.initDef != null)
+            node.initDef = (varDefNode) visit(ctx.initDef);
+        else
+            node.initDef = null;
         if (ctx.cond != null)
             node.cond = (ExpressionNode) visit(ctx.cond);
         else
@@ -244,9 +248,9 @@ public class ASTBuilder extends MxParserBaseVisitor<ASTNode> {
     public ASTNode visitFuncExp(MxParser.FuncExpContext ctx) {
         funcExpNode node = new funcExpNode(new position(ctx));
         node.master = (ExpressionNode) visit(ctx.expression());
-        if(node.master instanceof memberExpNode){
-            ((memberExpNode)node.master).isFunc=true;
-            node.master.isAssignable=false;
+        if (node.master instanceof memberExpNode) {
+            ((memberExpNode) node.master).isFunc = true;
+            node.master.isAssignable = false;
         }
         if (ctx.expressionGroup() != null)
             node.expList = ((expressionGroupNode) visit(ctx.expressionGroup())).expList;

@@ -238,6 +238,8 @@ public class IRBuilder implements ASTVisitor {
         node.moveBlock = moveBlock;
         if (node.init != null)
             node.init.accept(this);
+        if(node.initDef!= null)
+            node.initDef.accept(this);
         if (node.cond != null) {
             currentBlock.addEndInst(new Jump(currentBlock, conditionBlock));
             currentBlock = conditionBlock;

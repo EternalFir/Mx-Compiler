@@ -29,12 +29,12 @@ import java.io.PrintStream;
 public class Compiler {
     public static void main(String[] args) throws Exception {
 
-        InputStream input = System.in;
+//        InputStream input = System.in;
 
         String inputFile = "input.mx";
         String outputFile = "output.s";
 
-//        InputStream input = new FileInputStream(inputFile);
+        InputStream input = new FileInputStream(inputFile);
         PrintStream output = new PrintStream(new FileOutputStream(outputFile));
         System.setOut(output);
         try {

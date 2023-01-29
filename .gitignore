@@ -10,6 +10,8 @@ output
 output.s
 builtin.s
 
+*.iml
+
  
 # Compiled class file
 *.class

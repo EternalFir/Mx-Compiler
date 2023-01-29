@@ -21,7 +21,7 @@ lambdaDef : '[' ifAnd='&'? ']' ('(' parlist=paramGroup?')')? '->'  codeBlock '('
 sentence : codeBlock                                                                                 #blockSent
          | varDef                                                                                    #varDefSent
          | IF '(' cond=expression ')' trueSent=sentence (ELSE falseSent=sentence)?                   #ifSent
-         | FOR '(' init=expression?  ';' cond=expression? ';' move=expression? ')' repeSent=sentence #forSent
+         | FOR '(' (init=expression? ';'|initDef= varDef?)  cond=expression? ';' move=expression? ')' repeSent=sentence #forSent
          | WHILE '(' cond=expression ')' repeSent=sentence                                           #whileSent
          | RETURN expression? ';'                                                                    #returnSent
          | BREAK ';'                                                                                 #breakSent
