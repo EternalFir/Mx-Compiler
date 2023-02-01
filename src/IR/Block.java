@@ -14,7 +14,7 @@ public class Block {
     public ArrayList<instruction> inst = new ArrayList<>();
     public ArrayList<Block> prevBlocks = new ArrayList<>();
     public ArrayList<Block> nextBlocks = new ArrayList<>();
-    public HashMap<register, operand> regValues = new HashMap<>();
+    public HashMap<register, operand> regValues = new HashMap<>(); // with phi values
     public Phi branchFrom = null;
     public int loopDepth = 0;
     public boolean is_end = false;

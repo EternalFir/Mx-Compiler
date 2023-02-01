@@ -58,7 +58,7 @@ public class LinerTree {
             subSon.put(i, new ArrayList<>());
             count++;
         }
-        sub.replace(currentFunction.beginBlock, currentFunction.beginBlock);
+        sub.replace(currentFunction.beginBlock, currentFunction.beginBlock); //start
         boolean changed = true;
         while (changed) {
             changed = false;

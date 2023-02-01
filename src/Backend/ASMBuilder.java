@@ -413,9 +413,9 @@ public class ASMBuilder {
     }
 
     public void run() {
-        asm.globalVariables = ir.var;
+        asm.globalVariables = ir.globalVars;
         asm.constStr = ir.constString;
-        ir.func.forEach((name, func) -> runFunc(func));
+        ir.funcs.forEach((name, func) -> runFunc(func));
     }
 
 }

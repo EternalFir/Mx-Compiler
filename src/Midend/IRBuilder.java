@@ -87,13 +87,13 @@ public class IRBuilder implements ASTVisitor {
             currentFunction.classPtr = new register(new pointerIRType(currentClass), "this");
             currentFunction.params.add((register) currentFunction.classPtr);
         }
-        iR.func.put(currentFunction.name, currentFunction);
+        iR.funcs.put(currentFunction.name, currentFunction);
 
 //        System.out.println(currentFunction.beginBlock.intoString());
 
         currentBlock = currentFunction.beginBlock;
         if (currentFunction.name.equals("main")) {
-            currentBlock.addInst(new Call(currentBlock, null, iR.func.get("__init")));
+            currentBlock.addInst(new Call(currentBlock, null, iR.funcs.get("__init"))); // put in global vars
         }
         for (varDefSubNode i : node.paramList) {
             i.varSymbol.operand = new register(iR.getType(i.varSymbol.type), i.name);
@@ -106,36 +106,35 @@ public class IRBuilder implements ASTVisitor {
                 tempReturn = new Return(currentBlock, new constInt(0, 32));
             else if (currentFunction.returnType.sameType(new voidIRType()))
                 tempReturn = new Return(currentBlock, new constVoid());
-            else if (currentFunction.returnInsts.isEmpty()){
+            else if (currentFunction.returnInsts.isEmpty()) {
 
 //                System.out.println(currentFunction.name);
 //                System.out.println(currentFunction.returnType.intoString());
 
                 throw new innerError("no return sentence.");
-            }
-            else
+            } else
                 tempReturn = new Return(currentBlock, new constVoid());
             currentBlock.addEndInst(tempReturn);
             currentFunction.returnInsts.add(tempReturn);
         }
         if (currentFunction.returnInsts.size() > 1) { // multi-return cases
-            currentBlock = new Block(loopDepth);
+            Block sumUpBlock = new Block(loopDepth);
             Return tempReturn;
             if (!currentFunction.returnType.sameType(new voidIRType())) {
-                register temp = new register(currentFunction.returnType, "tmp.");
-                Phi phi = new Phi(currentBlock, temp);
+                register phiReg = new register(currentFunction.returnType, "tmp.");
+                Phi phi = new Phi(sumUpBlock, phiReg);
                 for (Return i : currentFunction.returnInsts) {
                     phi.add(i.block, ((Return) i.block.getEndInst()).value);
                 }
-                currentBlock.addInst(phi);
-                tempReturn = new Return(currentBlock, temp);
+                sumUpBlock.addInst(phi);
+                tempReturn = new Return(sumUpBlock, phiReg);
             } else {
-                tempReturn = new Return(currentBlock, new constVoid());
+                tempReturn = new Return(sumUpBlock, new constVoid());
             }
-            currentBlock.addEndInst(tempReturn);
+            sumUpBlock.addEndInst(tempReturn);
             for (Return i : currentFunction.returnInsts) {
                 i.block.popEndInst();
-                i.block.addEndInst(new Jump(i.block, currentBlock));
+                i.block.addEndInst(new Jump(i.block, sumUpBlock));
             }
             currentFunction.returnInsts = new ArrayList<>(Collections.singletonList(tempReturn));
         }
@@ -150,9 +149,9 @@ public class IRBuilder implements ASTVisitor {
             reg.isGlobal = true;
             reg.isConstPtr = true;
             node.varSymbol.operand = reg;
-            iR.var.put(node.name, reg);
+            iR.globalVars.put(node.name, reg);
             if (node.expression != null) {
-                currentFunction = iR.func.get("__init");
+                currentFunction = iR.funcs.get("__init");
                 currentBlock = iR.destBlock;
                 node.expression.accept(this);
                 assignment(node.varSymbol.operand, node.expression.operand);
@@ -162,7 +161,7 @@ public class IRBuilder implements ASTVisitor {
             }
         } else {
             node.varSymbol.operand = new register(typeNow, node.name);
-            if (currentClass != null && currentFunction == null) {
+            if (currentClass != null && currentFunction == null) { // vars in class but not in class function
                 node.varSymbol.isClassVal = true;
                 ((register) node.varSymbol.operand).name = currentClass.name + "." + node.name;
                 currentClass.addVar((register) node.varSymbol.operand);
@@ -203,7 +202,7 @@ public class IRBuilder implements ASTVisitor {
     public void visit(codeBlockNode node) {
         for (SentenceNode i : node.sentencesList) {
             i.accept(this);
-            if (currentBlock.is_end)
+            if (currentBlock.is_end) // cut all insts after return
                 break;
         }
     }
@@ -236,10 +235,16 @@ public class IRBuilder implements ASTVisitor {
         Block repeatBlock = new Block(loopDepth);
         node.destinationBlock = destinationBlock;
         node.moveBlock = moveBlock;
-        if (node.init != null)
+        if (node.init != null) {
             node.init.accept(this);
-        if(node.initDef!= null)
+            if (node.initDef != null)
+                throw new innerError("Both init and initDef in for sentence.");
+        }
+        if (node.initDef != null) {
             node.initDef.accept(this);
+            if (node.init != null)
+                throw new innerError("Both init and initDef in for sentence.");
+        }
         if (node.cond != null) {
             currentBlock.addEndInst(new Jump(currentBlock, conditionBlock));
             currentBlock = conditionBlock;
@@ -342,8 +347,8 @@ public class IRBuilder implements ASTVisitor {
 
     @Override
     public void visit(binaryExpNode node) {
-        String op = null;
-        String opName = null;
+        String op;
+        String strFuncName;
         operand lhs, rhs;
         switch (node.op) {
             case "*":
@@ -375,14 +380,14 @@ public class IRBuilder implements ASTVisitor {
                 break;
             case "+":
                 op = "add";
-                opName = "__builtIn__stringAdd";
+                strFuncName = "__builtIn__stringAdd";
                 if (node.lexp.type.isString()) {
                     node.lexp.accept(this);
                     node.rexp.accept(this);
                     lhs = getReg(node.lexp.operand);
                     rhs = getReg(node.rexp.operand);
                     node.operand = new register(lhs.irType, "tmp.");
-                    Function func = new Function(opName);
+                    Function func = new Function(strFuncName);
                     func.returnType = new stringIRType();
                     Call inst = new Call(currentBlock, (register) node.operand, func);
                     inst.params.add(lhs);
@@ -426,14 +431,14 @@ public class IRBuilder implements ASTVisitor {
                 break;
             case "<":
                 op = "slt";
-                opName = "__builtIn__stringLt";
+                strFuncName = "__builtIn__stringLt";
                 if (node.lexp.type.isString()) {
                     node.lexp.accept(this);
                     node.rexp.accept(this);
                     lhs = getReg(node.lexp.operand);
                     rhs = getReg(node.rexp.operand);
                     node.operand = new register(lhs.irType, "tmp.");
-                    Function func = new Function(opName);
+                    Function func = new Function(strFuncName);
                     func.returnType = new boolIRType();
                     Call inst = new Call(currentBlock, (register) node.operand, func);
                     inst.params.add(lhs);
@@ -451,14 +456,14 @@ public class IRBuilder implements ASTVisitor {
                 break;
             case ">":
                 op = "sgt";
-                opName = "__builtIn__strGt";
+                strFuncName = "__builtIn__strGt";
                 if (node.lexp.type.isString()) {
                     node.lexp.accept(this);
                     node.rexp.accept(this);
                     lhs = getReg(node.lexp.operand);
                     rhs = getReg(node.rexp.operand);
                     node.operand = new register(lhs.irType, "tmp.");
-                    Function func = new Function(opName);
+                    Function func = new Function(strFuncName);
                     func.returnType = new boolIRType();
                     Call inst = new Call(currentBlock, (register) node.operand, func);
                     inst.params.add(lhs);
@@ -476,14 +481,14 @@ public class IRBuilder implements ASTVisitor {
                 break;
             case "<=":
                 op = "sle";
-                opName = "__builtIn__stringLe";
+                strFuncName = "__builtIn__stringLe";
                 if (node.lexp.type.isString()) {
                     node.lexp.accept(this);
                     node.rexp.accept(this);
                     lhs = getReg(node.lexp.operand);
                     rhs = getReg(node.rexp.operand);
                     node.operand = new register(lhs.irType, "tmp.");
-                    Function func = new Function(opName);
+                    Function func = new Function(strFuncName);
                     func.returnType = new boolIRType();
                     Call inst = new Call(currentBlock, (register) node.operand, func);
                     inst.params.add(lhs);
@@ -501,14 +506,14 @@ public class IRBuilder implements ASTVisitor {
                 break;
             case ">=":
                 op = "sge";
-                opName = "__builtIn__stringGe";
+                strFuncName = "__builtIn__stringGe";
                 if (node.lexp.type.isString()) {
                     node.lexp.accept(this);
                     node.rexp.accept(this);
                     lhs = getReg(node.lexp.operand);
                     rhs = getReg(node.rexp.operand);
                     node.operand = new register(lhs.irType, "tmp.");
-                    Function func = new Function(opName);
+                    Function func = new Function(strFuncName);
                     func.returnType = new boolIRType();
                     Call inst = new Call(currentBlock, (register) node.operand, func);
                     inst.params.add(lhs);
@@ -526,14 +531,14 @@ public class IRBuilder implements ASTVisitor {
                 break;
             case "==":
                 op = "eq";
-                opName = "__builtIn__stringEq";
+                strFuncName = "__builtIn__stringEq";
                 if (node.lexp.type.isString()) {
                     node.lexp.accept(this);
                     node.rexp.accept(this);
                     lhs = getReg(node.lexp.operand);
                     rhs = getReg(node.rexp.operand);
                     node.operand = new register(lhs.irType, "tmp.");
-                    Function func = new Function(opName);
+                    Function func = new Function(strFuncName);
                     func.returnType = new boolIRType();
                     Call inst = new Call(currentBlock, (register) node.operand, func);
                     inst.params.add(lhs);
@@ -555,14 +560,14 @@ public class IRBuilder implements ASTVisitor {
                 break;
             case "!=":
                 op = "ne";
-                opName = "__builtIn__stringNe";
+                strFuncName = "__builtIn__stringNe";
                 if (node.lexp.type.isString()) {
                     node.lexp.accept(this);
                     node.rexp.accept(this);
                     lhs = getReg(node.lexp.operand);
                     rhs = getReg(node.rexp.operand);
                     node.operand = new register(lhs.irType, "tmp.");
-                    Function func = new Function(opName);
+                    Function func = new Function(strFuncName);
                     func.returnType = new boolIRType();
                     Call inst = new Call(currentBlock, (register) node.operand, func);
                     inst.params.add(lhs);
@@ -686,8 +691,8 @@ public class IRBuilder implements ASTVisitor {
             if (((register) temp).isConstPtr)
                 temp = getReg(temp);
             classIRType classType = (classIRType) ((pointerIRType) temp.irType).ptrType;
-            node.operand = new register(new pointerIRType(classType.getVarRegister(node.callee).irType), "tmp.");
-            int index = classType.getID(node.callee);
+            node.operand = new register(new pointerIRType(classType.getVarRegister(node.name).irType), "tmp.");
+            int index = classType.getID(node.name);
             currentBlock.addInst(new GetElementPtr(currentBlock, node.operand, temp, new constInt(0, 32), new constInt(index, 32)));
             ((register) node.operand).isConstPtr = true;
         }
@@ -750,7 +755,7 @@ public class IRBuilder implements ASTVisitor {
             assignment(node.exp.operand, node.operand);
         } else if (node.op.equals("--")) {
             currentBlock.addInst(new Binary(currentBlock, (register) node.operand, expression, new constInt(1, 32), "sub"));
-            assignment(node.exp.operand,node.operand);
+            assignment(node.exp.operand, node.operand);
         }
         choseBranch(node);
     }
@@ -923,8 +928,8 @@ public class IRBuilder implements ASTVisitor {
             currentBlock = masterBlock;
             register iPtr = new register(returnType, "tmp.");
             currentBlock.addInst(new GetElementPtr(currentBlock, iPtr, arrayPtr, iReg));
-            register iItem = arrayCreation(dimension + 1, node, itemType);
-            currentBlock.addInst(new Store(currentBlock, iPtr, iItem));
+            register item = arrayCreation(dimension + 1, node, itemType);
+            currentBlock.addInst(new Store(currentBlock, iPtr, item));
             currentBlock.addEndInst(new Jump(currentBlock, conditionBlock));
             currentBlock = conditionBlock;
             currentBlock.addInst(new Binary(currentBlock, iReg, iReg, new constInt(1, 32), "add"));
@@ -966,29 +971,44 @@ public class IRBuilder implements ASTVisitor {
         }
     }
 
-    public void variableSimplify() { //rename variables with same name.
+    public void variablesDiffer() { //rename variables with same name.
         ArrayList<register> list = new ArrayList<>(currentFunction.vars);
         for (int i = 0; i < list.size(); i++) {
             for (int j = i + 1; j < list.size(); j++) {
                 if (list.get(j).name.equals(list.get(i).name)) {
                     list.get(j).name = list.get(i).name + "_rename";
 
-//                    System.out.println("variableSimplify"+list.get(j).name);
+//                    System.out.println("variablesDiffer"+list.get(j).name);
                 }
             }
         }
     }
 
-    public void blockCut(Block node) {
+    public void preHandle(Block node) {
+        // cut blocks;
         dfsBlock(node);
         currentFunction.blocks.forEach(k -> {
-            for (int i = 0; i < k.prevBlocks.size(); i++) {
+            for (int i = 0; i < k.prevBlocks.size(); i++) { // some blocks may have been merged
                 if (k.prevBlocks.get(i).name == null) {
                     k.prevBlocks.remove(i);
                     i--;
                 }
             }
         });
+        //change related phi
+        for (Block block : currentFunction.blocks) {
+            for (instruction inst : block.inst) {
+                if (inst instanceof Phi) {
+                    for (int i = 0; i < ((Phi) inst).blocks.size(); i++) {
+                        if (!currentFunction.blocks.contains(((Phi) inst).blocks.get(i))) {
+                            ((Phi) inst).blocks.remove(i);
+                            ((Phi) inst).values.remove(i);
+                            i--;
+                        }
+                    }
+                }
+            }
+        }
     }
 
     public void variableSet() {
@@ -1007,7 +1027,7 @@ public class IRBuilder implements ASTVisitor {
     public void variableRenaming(register reg, Block node) {
         register oldTop = reg.renamingStack.peek(); //reserve begin peek
         for (instruction i : node.inst) {
-            if (!(i instanceof Phi) || !((Phi) i).isMain)
+            if (!(i instanceof Phi) || !((Phi) i).isMain) // not set in getPhi
                 i.replace(reg, reg.renamingStack.peek());
             if (i.register != null && i.register == reg) {
                 i.register = new register(reg.irType, reg.name + "_" + (reg.renamingID++));
@@ -1064,9 +1084,9 @@ public class IRBuilder implements ASTVisitor {
             }
         }
         // phi unused
-        AtomicBoolean condition = new AtomicBoolean(true);
-        while (condition.get()) {
-            condition.set(false);
+        boolean condition =true;
+        while (condition) {
+            condition=false;
             for (Block blk : currentFunction.blocks) {
                 for (instruction inst : blk.inst) {
                     ArrayList<operand> operands = inst.getUsedOperand();
@@ -1082,7 +1102,7 @@ public class IRBuilder implements ASTVisitor {
                     if (inst instanceof Phi) {
                         if (!inst.register.used) {
                             blk.popInst(inst);
-                            condition.set(true);
+                            condition=true;
                             i--;
                         } else {
                             inst.register.used = false;
@@ -1093,26 +1113,18 @@ public class IRBuilder implements ASTVisitor {
         }
     }
 
-    public void runEachInst() {
-        AtomicInteger cnt = new AtomicInteger();
+    public void getVariables() {
+        int tempRegCnt = 0;
         currentFunction.vars.addAll(currentFunction.params);
-        for (Block k : currentFunction.blocks) {
-            for (instruction x : k.inst) {
-                if (x instanceof Phi) {
-                    for (int i = 0; i < ((Phi) x).blocks.size(); i++) {
-                        if (!currentFunction.blocks.contains(((Phi) x).blocks.get(i))) { // cut useless phi
-                            ((Phi) x).blocks.remove(i);
-                            ((Phi) x).values.remove(i);
-                            i--;
-                        }
-                    }
-                }
-                if (x.register != null) {
-                    if (!x.register.name.equals("tmp.")) {
-                        currentFunction.vars.add(x.register);
-                        x.register.assign.add(x);
+        for (Block block : currentFunction.blocks) {
+            for (instruction inst : block.inst) {
+                if (inst.register != null) {
+                    if (!inst.register.name.equals("tmp.")) {
+                        currentFunction.vars.add(inst.register);
+                        inst.register.assign.add(inst);
                     } else {
-                        x.register.name = "tmp." + (cnt.getAndIncrement());
+                        inst.register.name = "tmp." + tempRegCnt;
+                        tempRegCnt++;
                     }
                 }
             }
@@ -1125,7 +1137,7 @@ public class IRBuilder implements ASTVisitor {
 //        int dbg_cnt = 0;
 
 //        for (Block block : function.blocks) {
-        for (int block_num = 0; block_num < function.blocks.size(); block_num++) { // changed contains in ArrayList in midway, can use : to ergodic
+        for (int block_num = 0; block_num < function.blocks.size(); block_num++) { // blocks changed in ArrayList in midway, can use : to ergodic
             Block block = function.blocks.get(block_num);
             boolean containPhi = false;
             for (instruction i : block.inst) {
@@ -1197,12 +1209,12 @@ public class IRBuilder implements ASTVisitor {
     }
 
     public void run() {
-        iR.func.forEach((name, function) -> {
+        iR.funcs.forEach((name, function) -> {
             currentFunction = function;
             iR.destBlock.addEndInst(new Return(iR.destBlock, new constVoid()));
-            blockCut(function.beginBlock);
-            runEachInst();
-            variableSimplify();
+            preHandle(function.beginBlock);
+            getVariables();
+            variablesDiffer();
 
 //            System.out.println("phi");
 

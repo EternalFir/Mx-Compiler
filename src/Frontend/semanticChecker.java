@@ -346,13 +346,13 @@ public class semanticChecker implements ASTVisitor {
         node.caller.accept(this);
 
         // builtInMethods
-        if (node.caller.type instanceof arrayType && node.isFunc && node.callee.equals("size")) {
+        if (node.caller.type instanceof arrayType && node.isFunc && node.name.equals("size")) {
             funcSymbol sizeFunc = new funcSymbol("size");
             sizeFunc.returnType = new primitiveType("int");
             node.type = sizeFunc;
             return;
         }
-        if (node.caller.type.isString() && node.isFunc && node.callee.equals("length")) {
+        if (node.caller.type.isString() && node.isFunc && node.name.equals("length")) {
             funcSymbol lengthFunc = new funcSymbol("length");
             lengthFunc.returnType = new primitiveType("int");
             node.type = lengthFunc;
@@ -360,7 +360,7 @@ public class semanticChecker implements ASTVisitor {
             lengthFunc.function.returnType = ir.getType(lengthFunc.returnType);
             return;
         }
-        if (node.caller.type.isString() && node.isFunc && node.callee.equals("substring")) {
+        if (node.caller.type.isString() && node.isFunc && node.name.equals("substring")) {
             funcSymbol substringFunc = new funcSymbol("substring");
             substringFunc.returnType = new primitiveType("string");
             substringFunc.paramList.add(new varSymbol("left", new primitiveType("int")));
@@ -370,7 +370,7 @@ public class semanticChecker implements ASTVisitor {
             substringFunc.function.returnType = ir.getType(substringFunc.returnType);
             return;
         }
-        if (node.caller.type.isString() && node.isFunc && node.callee.equals("parseInt")) {
+        if (node.caller.type.isString() && node.isFunc && node.name.equals("parseInt")) {
             funcSymbol parseIntFunc = new funcSymbol("parseInt");
             parseIntFunc.returnType = new primitiveType("int");
             node.type = parseIntFunc;
@@ -378,7 +378,7 @@ public class semanticChecker implements ASTVisitor {
             parseIntFunc.function.returnType = ir.getType(parseIntFunc.returnType);
             return;
         }
-        if (node.caller.type.isString() && node.isFunc && node.callee.equals("ord")) {
+        if (node.caller.type.isString() && node.isFunc && node.name.equals("ord")) {
             funcSymbol ordFunc = new funcSymbol("ord");
             ordFunc.returnType = new primitiveType("int");
             ordFunc.paramList.add(new varSymbol("pos", new primitiveType("int")));
@@ -392,13 +392,13 @@ public class semanticChecker implements ASTVisitor {
             throw new semanticError("not a class", node.pos);
         classType classType = (classType) node.caller.type;
         if (node.isFunc) {
-            if (classType.funcMap.containsKey(node.callee))
-                node.type = classType.funcMap.get(node.callee);
+            if (classType.funcMap.containsKey(node.name))
+                node.type = classType.funcMap.get(node.name);
             else
                 throw new semanticError("no such symbol", node.pos);
         } else {
-            if (classType.varMap.containsKey(node.callee))
-                node.type = classType.varMap.get(node.callee).type;
+            if (classType.varMap.containsKey(node.name))
+                node.type = classType.varMap.get(node.name).type;
             else
                 throw new semanticError("no such symbol", node.pos);
 

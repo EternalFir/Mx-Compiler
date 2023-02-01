@@ -79,8 +79,8 @@ public class IRPrinter {
         printer.println("declare i1 @__builtin_str_eq(i8*, i8*)");
         printer.println("declare i1 @__builtin_str_ne(i8*, i8*)");
         iR.classes.forEach((name, classType) -> printClass(classType));
-        iR.var.forEach((name, reg) -> printGlobalVar(reg));
+        iR.globalVars.forEach((name, reg) -> printGlobalVar(reg));
         iR.constString.forEach((name, str) -> printConstString(str));
-        iR.func.forEach((name, func) -> printFunction(func));
+        iR.funcs.forEach((name, func) -> printFunction(func));
     }
 }
