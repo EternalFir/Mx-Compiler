@@ -39,8 +39,8 @@ public class IRBuilder implements ASTVisitor {
     public HashSet<Function> canInLine;
     public HashSet<Function> canNotInLine;
 
-    int inlineBlockLimit=20;
-    int inlineInstLimit=200;
+    int inlineBlockLimit=35;
+    int inlineInstLimit=500;
     int inlineCount = 0;
 
     String preName;
