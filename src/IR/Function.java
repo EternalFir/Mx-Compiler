@@ -10,7 +10,7 @@ import java.util.HashSet;
 
 public class Function {
     public String name;
-    public Block beginBlock= new Block(0);
+    public Block beginBlock = new Block(0);
 
     public ArrayList<Block> blocks = new ArrayList<>();
     public ArrayList<register> params = new ArrayList<>();
@@ -26,5 +26,13 @@ public class Function {
 
     public String intoString() {
         return "@" + name;
+    }
+
+    public int getInstCount() {
+        int sum = 0;
+        for (Block block : blocks) {
+            sum += block.getInstCount();
+        }
+        return sum;
     }
 }

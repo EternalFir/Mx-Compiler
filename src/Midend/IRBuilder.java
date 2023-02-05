@@ -30,6 +30,23 @@ public class IRBuilder implements ASTVisitor {
 
     public LinerTree linerTree;
 
+    public HashSet<Function> visited;
+    public Stack<Function> visitStack;
+
+    public HashMap<Function, ArrayList<Function>> funcLink;
+    public HashMap<Function, ArrayList<Call>> callLink;
+    public HashMap<Function, ArrayList<Function>> reFuncLink;
+    public HashSet<Function> canInLine;
+    public HashSet<Function> canNotInLine;
+
+    int inlineCount = 0;
+
+    String preName;
+
+    public HashMap<Block, Block> inlineBlocks;
+    public HashMap<operand, operand> inlineValues;
+
+
     public IRBuilder(IR iR_in) {
         iR = iR_in;
     }
@@ -988,7 +1005,7 @@ public class IRBuilder implements ASTVisitor {
         // cut blocks;
         dfsBlock(node);
         currentFunction.blocks.forEach(k -> {
-            for (int i = 0; i < k.prevBlocks.size(); i++) { // some blocks may have been merged
+            for (int i = 0; i < k.prevBlocks.size(); i++) { // some blocks may not reached
                 if (k.prevBlocks.get(i).name == null) {
                     k.prevBlocks.remove(i);
                     i--;
@@ -1048,7 +1065,6 @@ public class IRBuilder implements ASTVisitor {
         }
         while (reg.renamingStack.peek() != oldTop)
             reg.renamingStack.pop();
-
     }
 
     public void phiSimplify() {
@@ -1084,9 +1100,9 @@ public class IRBuilder implements ASTVisitor {
             }
         }
         // phi unused
-        boolean condition =true;
+        boolean condition = true;
         while (condition) {
-            condition=false;
+            condition = false;
             for (Block blk : currentFunction.blocks) {
                 for (instruction inst : blk.inst) {
                     ArrayList<operand> operands = inst.getUsedOperand();
@@ -1102,7 +1118,7 @@ public class IRBuilder implements ASTVisitor {
                     if (inst instanceof Phi) {
                         if (!inst.register.used) {
                             blk.popInst(inst);
-                            condition=true;
+                            condition = true;
                             i--;
                         } else {
                             inst.register.used = false;
@@ -1129,6 +1145,290 @@ public class IRBuilder implements ASTVisitor {
                 }
             }
         }
+    }
+
+    public void inlineInit() {
+        visited = new HashSet<>();
+        visitStack = new Stack<>();
+        funcLink = new HashMap<>();
+        callLink = new HashMap<>();
+        reFuncLink = new HashMap<>();
+        canInLine = new HashSet<>();
+        canNotInLine = new HashSet<>();
+    }
+
+    public void getCall() {
+        iR.funcs.forEach((name, func) -> {
+            funcLink.put(func, new ArrayList<>());
+            callLink.put(func, new ArrayList<>());
+            reFuncLink.put(func, new ArrayList<>());
+        });
+        iR.funcs.forEach((name, func) -> {
+            for (Block block : func.blocks) {
+                for (instruction inst : block.inst) {
+                    if (inst instanceof Call && !(((Call) inst).function.name.startsWith("__builtIn__"))) {
+                        funcLink.get(func).add(((Call) inst).function);
+                        callLink.get(((Call) inst).function).add((Call) inst);
+                        reFuncLink.get(((Call) inst).function).add(func);
+                    }
+                }
+            }
+        });
+    }
+
+    public void dfsInLineCheck(Function func) {
+        boolean isRingCall = false; // in case of a loop call
+        visited.add(func);
+        visitStack.push(func);
+        for (Function f : visitStack) {
+            if (funcLink.get(func).contains(f))
+                isRingCall = true;
+            if (isRingCall)
+                canNotInLine.add(f);
+        }
+        for (Function f : funcLink.get(func)) {
+            if (!visited.contains(f))
+                dfsInLineCheck(f);
+        }
+        visitStack.pop();
+    }
+
+    public Function inlineCollectFuncNow;
+
+    public void dfsBlockInLine(Block block) {
+        inlineCollectFuncNow.blocks.add(block);
+        for (Block b : block.nextBlocks) {
+            if (!inlineCollectFuncNow.blocks.contains(b))
+                dfsBlockInLine(b);
+        }
+    }
+
+    public void setCanInLine() {
+        canNotInLine.add(iR.funcs.get("main"));
+        dfsInLineCheck(iR.funcs.get("main"));
+        iR.funcs.forEach((name, func) -> {
+            if (!canNotInLine.contains(func)) {
+                int instCount = func.getInstCount();
+                if (instCount <= 500 && func.blocks.size() <= 30) {
+                    canInLine.add(func);
+                }
+            }
+        });
+    }
+
+    public HashSet<Function> alreadyInLine = new HashSet<>();
+
+    public operand getValueNew(operand old) {
+        if (old != null) {
+            if (!inlineValues.containsKey(old)) {
+                if (old instanceof register && !((register) old).isGlobal) {
+                    inlineValues.put(old, new register(old.irType, preName + ((register) old).name, ((register) old).isGlobal, ((register) old).isConstPtr));
+                } else {
+                    inlineValues.put(old, old);
+                }
+            }
+            return inlineValues.get(old);
+        } else
+            return null;
+    }
+
+    public void setNewBlock(Function func) {
+        for (Block oldBlock : func.blocks) {
+            Block newBlock = new Block(oldBlock.loopDepth);
+            newBlock.name = preName + oldBlock.name;
+            newBlock.is_end = oldBlock.is_end;
+            inlineBlocks.put(oldBlock, newBlock);
+        }
+    }
+
+    public void moveInLine(Call call, Function callerFunc) {
+        inlineBlocks = new HashMap<>();
+        inlineValues = new HashMap<>();
+        Function calleeFunc = call.function;
+        int instCount = calleeFunc.getInstCount();
+        if (calleeFunc.blocks.size() > 30 || instCount > 500)
+            return;
+        inlineCount++;
+        preName = "inlineFunc." + calleeFunc.name + "." + inlineCount + ".";
+        setNewBlock(calleeFunc);
+        Block beginBlockNow = inlineBlocks.get(calleeFunc.beginBlock);
+        Block endBlockNow = new Block(-1);
+
+        // change blocks and operands
+        for (Block oldBlock : calleeFunc.blocks) {
+            Block newBlock = inlineBlocks.get(oldBlock);
+            for (Block b : oldBlock.prevBlocks) {
+                newBlock.prevBlocks.add(inlineBlocks.get(b));
+            }
+            for (Block b : oldBlock.nextBlocks) {
+                newBlock.nextBlocks.add(inlineBlocks.get(b));
+            }
+            for (instruction inst : oldBlock.inst) {
+                if (inst instanceof Assign) {
+                    newBlock.inst.add(new Assign(newBlock, getValueNew(inst.register), getValueNew(((Assign) inst).value)));
+                } else if (inst instanceof Binary) {
+                    newBlock.inst.add(new Binary(newBlock, (register) getValueNew(inst.register), getValueNew(((Binary) inst).lhs), getValueNew(((Binary) inst).rhs), ((Binary) inst).op));
+                } else if (inst instanceof BitCast) {
+                    newBlock.inst.add(new BitCast(newBlock, getValueNew(inst.register), getValueNew(((BitCast) inst).value)));
+                } else if (inst instanceof Branch) {
+                    newBlock.inst.add(new Branch(newBlock, getValueNew(((Branch) inst).condition), inlineBlocks.get(((Branch) inst).trueBlock), inlineBlocks.get(((Branch) inst).falseBlock)));
+                } else if (inst instanceof Call) {
+                    Call newCall = new Call(newBlock, (register) getValueNew(inst.register), ((Call) inst).function);
+                    for (operand o : ((Call) inst).params) {
+                        newCall.params.add(getValueNew(o));
+                    }
+                    newBlock.inst.add(newCall);
+
+//                    System.out.println(((Call) inst).function.name);
+
+                } else if (inst instanceof GetElementPtr) {
+                    newBlock.inst.add(new GetElementPtr(newBlock, getValueNew(inst.register), getValueNew(((GetElementPtr) inst).base), getValueNew(((GetElementPtr) inst).index), ((GetElementPtr) inst).offset));
+                } else if (inst instanceof Icmp) {
+                    newBlock.inst.add(new Icmp(newBlock, (register) getValueNew(inst.register), getValueNew(((Icmp) inst).lhs), getValueNew(((Icmp) inst).rhs), ((Icmp) inst).op));
+                } else if (inst instanceof Jump) {
+                    newBlock.inst.add(new Jump(newBlock, inlineBlocks.get(((Jump) inst).destination)));
+                } else if (inst instanceof Load) {
+                    newBlock.inst.add(new Load(newBlock, (register) getValueNew(inst.register), getValueNew(((Load) inst).address)));
+                } else if (inst instanceof Phi) {
+                    Phi newPhi = new Phi(newBlock, (register) getValueNew(inst.register));
+                    newPhi.isMain = ((Phi) inst).isMain;
+                    for (int i = 0; i < ((Phi) inst).blocks.size(); i++) {
+                        newPhi.add(inlineBlocks.get(((Phi) inst).blocks.get(i)), getValueNew(((Phi) inst).values.get(i)));
+                    }
+                    newBlock.inst.add(newPhi);
+
+
+//                    for (int i=0;i<((Phi) inst).blocks.size();i++){
+//                        System.out.println(((Phi) inst).blocks.get(i).intoString());
+//                        System.out.println(((Phi) inst).values.get(i).intoString());
+//                    }
+                } else if (inst instanceof Return) {
+                    newBlock.inst.add(new Return(newBlock, getValueNew(((Return) inst).value)));
+                    endBlockNow = newBlock;
+                } else if (inst instanceof Store) {
+                    newBlock.inst.add(new Store(newBlock, getValueNew(((Store) inst).address), getValueNew(((Store) inst).value)));
+                }
+            }
+        }
+        // get call inst pos
+        Block callerBlock = call.block;
+        int callInstPos = 0;
+        while (callerBlock.inst.get(callInstPos) != call) {
+            callInstPos++;
+        }
+//        for (int i=0;i<callerBlock.inst.size();i++){
+//            if(callerBlock.inst.get(i)== call){
+//                callInstPos=i;
+//                break;
+//            }
+//        }
+        // set pre block
+        Block preCallBlock = new Block(callerBlock.loopDepth);
+        preCallBlock.name = callerBlock.name + ".preCall";
+        preCallBlock.inst = new ArrayList<>(callerBlock.inst.subList(0, callInstPos));
+        for (int i = 0; i < call.params.size(); i++) {
+            preCallBlock.addInst(new Assign(preCallBlock, getValueNew(calleeFunc.params.get(i)), call.params.get(i)));
+        }
+        preCallBlock.is_end = true;
+        preCallBlock.inst.addAll(beginBlockNow.inst);
+        preCallBlock.prevBlocks = callerBlock.prevBlocks;
+        preCallBlock.nextBlocks = beginBlockNow.nextBlocks;
+        for (instruction inst : preCallBlock.inst) {
+            inst.block = preCallBlock;
+        }
+        for (Block block : preCallBlock.prevBlocks) {
+            for (int i = 0; i < block.nextBlocks.size(); i++) {
+                if (block.nextBlocks.get(i) == callerBlock) {
+                    block.nextBlocks.set(i, preCallBlock);
+                }
+            }
+            block.replaceNextBlock(callerBlock, preCallBlock);
+        }
+        for (Block block : preCallBlock.nextBlocks) {
+            for (int i = 0; i < block.prevBlocks.size(); i++) {
+                if (block.prevBlocks.get(i) == beginBlockNow)
+                    block.prevBlocks.set(i, preCallBlock);
+            }
+            block.replacePrevBlock(beginBlockNow, preCallBlock);
+        }
+        if (callerFunc.beginBlock == callerBlock) {
+            callerFunc.beginBlock = preCallBlock;
+        }
+        if (endBlockNow == beginBlockNow) { // has only one block
+            endBlockNow = preCallBlock;
+        }
+        // set after block
+        Block afterCallBlock = new Block(callerBlock.loopDepth);
+
+        afterCallBlock.name = callerBlock.name + ",afterCall";
+        Return newRet = (Return) endBlockNow.getEndInst();
+        endBlockNow.popEndInst();
+        afterCallBlock.inst = new ArrayList<>(endBlockNow.inst);
+        if (!(newRet.value instanceof constVoid)) { // has return
+            afterCallBlock.inst.add(new Assign(afterCallBlock, call.register, newRet.value));
+        }
+        afterCallBlock.is_end = true;
+        afterCallBlock.inst.addAll(callerBlock.inst.subList(callInstPos + 1, callerBlock.inst.size()));
+        afterCallBlock.prevBlocks = endBlockNow.prevBlocks;
+        afterCallBlock.nextBlocks = callerBlock.nextBlocks;
+        for (instruction inst : afterCallBlock.inst) {
+            inst.block = afterCallBlock;
+        }
+        Block newEndBlock = endBlockNow;
+        for (Block block : afterCallBlock.prevBlocks) {
+            for (int i = 0; i < block.nextBlocks.size(); i++) {
+                if (block.nextBlocks.get(i) == newEndBlock) {
+                    block.nextBlocks.set(i, afterCallBlock);
+                }
+            }
+            block.replaceNextBlock(newEndBlock, afterCallBlock);
+        }
+        for (Block block : afterCallBlock.nextBlocks) {
+            for (int i = 0; i < block.prevBlocks.size(); i++) {
+                if (block.prevBlocks.get(i) == callerBlock) {
+                    block.prevBlocks.set(i, afterCallBlock);
+                }
+            }
+            block.replacePrevBlock(callerBlock, afterCallBlock);
+        }
+        if (callerFunc.beginBlock == endBlockNow)
+            callerFunc.beginBlock = afterCallBlock;
+        inlineCollectFuncNow = callerFunc;
+        inlineCollectFuncNow.blocks = new ArrayList<>();
+        dfsBlockInLine(callerFunc.beginBlock);
+    }
+
+    public void setInLineFunc(Function func) {
+        if (!alreadyInLine.contains(func)) {
+            alreadyInLine.add(func);
+            for (Function sonFunc : funcLink.get(func)) {
+                setInLineFunc(sonFunc);
+            }
+            for (int i = 0; i < callLink.get(func).size(); i++) {
+                moveInLine(callLink.get(func).get(i), reFuncLink.get(func).get(i));
+            }
+        }
+    }
+
+    public void setLink() {
+        for (Map.Entry<String, Function> entry : iR.funcs.entrySet()) {
+            Function func = entry.getValue();
+            if (funcLink.get(func).contains(func)) {
+                for (int i = 0; i < callLink.get(func).size(); i++) {
+                    moveInLine(callLink.get(func).get(i), reFuncLink.get(func).get(i));
+                }
+            }
+        }
+    }
+
+    public void inline() {
+        inlineInit();
+        getCall();
+        setCanInLine();
+        for (Function func : canInLine) {
+            setInLineFunc(func);
+        }
+        setLink();
     }
 
     public void setPhi(Function function) {
@@ -1221,6 +1521,9 @@ public class IRBuilder implements ASTVisitor {
             getPhi();
             variableSet();
             phiSimplify();
+        });
+        inline();
+        iR.funcs.forEach((name, function) -> {
             setPhi(function);
         });
     }

@@ -125,4 +125,8 @@ public class Block {
             }
         }
     }
+
+    public int getInstCount(){
+        return inst.size();
+    }
 }

@@ -170,10 +170,9 @@ public class RegAllocator {
             activeInBlocks.put(block, new HashSet<>());
             activeAfterBlocks.put(block, new HashSet<>());
         }
-//        LinkedList<ASMBlock> queue = new LinkedList<>();
         Queue<ASMBlock> queue = new LinkedList<>();
         HashSet<ASMBlock> contains = new HashSet<>();
-        // get independent program points;
+        // find end blocks of program;
         for (ASMBlock block : funcNow.sonBlocks) {
             if (block.blockAfter.size() == 0) {
                 queue.add(block);
@@ -523,7 +522,7 @@ public class RegAllocator {
             ASMBlock blockNow = funcNow.sonBlocks.get(i);
             if (blockNow.blockBefore.size() == 1) {
                 ASMBlock blockBefore = blockNow.blockBefore.get(0);
-                if (blockBefore.getLastInst() instanceof isaJump && ((isaJump) blockBefore.getLastInst()).destination == blockNow) { // as link list
+                if (blockBefore.getLastInst() instanceof isaJump && ((isaJump) blockBefore.getLastInst()).destination == blockNow) {
                     blockBefore.blockAfter = blockNow.blockAfter;
                     blockBefore.popLastInst();
                     blockBefore.insts.addAll(blockNow.insts);

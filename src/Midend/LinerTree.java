@@ -15,7 +15,6 @@ public class LinerTree {
     public HashMap<Block, Block> sub = new HashMap<>();
     public HashMap<Block, ArrayList<Block>> subSon = new HashMap<>();
     public HashMap<Block, ArrayList<Block>> subP = new HashMap<>();
-    public ArrayList<Block> rNodes = new ArrayList<>();
     public HashMap<Block, HashSet<Block>> subSonTree = new HashMap<>();
 
 
@@ -106,7 +105,6 @@ public class LinerTree {
             son.add(i);
             son.addAll(subSonTree.get(i));
         }
-        rNodes.add(node);
         subSonTree.put(node, son);
     }
 
