@@ -1360,7 +1360,7 @@ public class IRBuilder implements ASTVisitor {
         // set after block
         Block afterCallBlock = new Block(callerBlock.loopDepth);
 
-        afterCallBlock.name = callerBlock.name + ",afterCall";
+        afterCallBlock.name = callerBlock.name + ".afterCall";
         Return newRet = (Return) endBlockNow.getEndInst();
         endBlockNow.popEndInst();
         afterCallBlock.inst = new ArrayList<>(endBlockNow.inst);
