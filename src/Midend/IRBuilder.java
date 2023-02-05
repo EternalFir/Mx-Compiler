@@ -39,6 +39,8 @@ public class IRBuilder implements ASTVisitor {
     public HashSet<Function> canInLine;
     public HashSet<Function> canNotInLine;
 
+    int inlineBlockLimit=20;
+    int inlineInstLimit=200;
     int inlineCount = 0;
 
     String preName;
@@ -1209,7 +1211,7 @@ public class IRBuilder implements ASTVisitor {
         iR.funcs.forEach((name, func) -> {
             if (!canNotInLine.contains(func)) {
                 int instCount = func.getInstCount();
-                if (instCount <= 500 && func.blocks.size() <= 30) {
+                if (instCount <=inlineInstLimit && func.blocks.size() <= inlineBlockLimit) {
                     canInLine.add(func);
                 }
             }
@@ -1246,7 +1248,7 @@ public class IRBuilder implements ASTVisitor {
         inlineValues = new HashMap<>();
         Function calleeFunc = call.function;
         int instCount = calleeFunc.getInstCount();
-        if (calleeFunc.blocks.size() > 30 || instCount > 500)
+        if (calleeFunc.blocks.size() > inlineInstLimit|| instCount > inlineBlockLimit)
             return;
         inlineCount++;
         preName = "inlineFunc." + calleeFunc.name + "." + inlineCount + ".";
